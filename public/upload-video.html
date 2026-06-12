@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIU Talent Show - Upload Video</title>
+  <link rel="stylesheet" href="upload-video.css" />
+</head>
+<body>
+  <div class="center">
+    <section class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>Share Your Talent</h2>
+          <p>Ready for the spotlight?</p>
+        </div>
+        <button class="close" onclick="window.location.href='home.html'">X</button>
+      </div>
+
+      <div class="tabs">
+        <button class="active" onclick="window.location.href='upload-video.html'">Video</button>
+        <button onclick="window.location.href='upload-audio.html'">Audio</button>
+        <button onclick="window.location.href='upload-blog.html'">Blog</button>
+      </div>
+
+      <div class="drop" id="drop-zone">
+        <div class="icon">Video</div>
+        <strong id="file-status">Drag & drop your masterpiece</strong>
+        <span>MP4, MOV or AVI (max 100MB)</span>
+        <button class="primary" id="select-file-btn" type="button">Select File</button>
+        <input type="file" id="media-file" accept="video/*" style="display: none;" />
+      </div>
+
+      <label>Title<input type="text" id="upload-title" placeholder="Give your act a catchy name" required /></label>
+      <div class="grid">
+        <label>Category<select id="upload-category"><option>Dance Performance</option><option>Acting</option><option>Cinematography</option></select></label>
+        <label>Tags<input type="text" id="upload-tags" placeholder="#dance #cover" /></label>
+      </div>
+      <label>Description<textarea id="upload-description" placeholder="Tell us about your preparation and what makes this special."></textarea></label>
+
+      <div class="footer">
+        <button class="ghost" onclick="window.location.href='home.html'">Cancel</button>
+        <button class="primary" id="publish-btn" type="button">Publish to Arena</button>
+      </div>
+    </section>
+  </div>
+  <script src="js/auth.js"></script>
+  <script src="js/uploads.js" defer></script>
+</body>
+</html>

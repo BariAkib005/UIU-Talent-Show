@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIU Talent Show - Settings</title>
+  <link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="brand-text">
+          <h1>UIU Talent Show</h1>
+          <p>The Arena</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="home.html">Home</a>
+        <a href="trending.html">Trending</a>
+        <a href="categories.html">Categories</a>
+        <a href="profile.html">My Portfolio</a>
+        <a class="active" href="#">Settings</a>
+      </nav>
+      <button class="cta">Upload Performance</button>
+      <div class="sidebar-footer">
+        <a href="#">Help</a>
+        <a href="#">Privacy</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="header">
+        <div>
+          <h2>Settings</h2>
+          <p>Manage your digital arena presence and preferences.</p>
+        </div>
+        <button class="ghost">Save Changes</button>
+      </header>
+
+      <div class="settings-grid">
+        <section class="settings-menu">
+          <button class="menu active">Profile</button>
+          <button class="menu">Account</button>
+          <button class="menu">Privacy</button>
+          <button class="menu">Notifications</button>
+          <button class="menu">Appearance</button>
+        </section>
+
+        <div class="settings-panels">
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <h3>Profile Information</h3>
+                <p>Keep your arena identity up to date.</p>
+              </div>
+              <button class="ghost">Edit</button>
+            </div>
+
+            <div class="profile-row">
+              <div class="avatar">AR</div>
+              <div>
+                <strong>Your Avatar</strong>
+                <p>Recommended size 400x400</p>
+                <div class="actions">
+                  <button class="chip">Upload New</button>
+                  <button class="chip ghost">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label>Full Name<input type="text" id="settings-name" placeholder="Arian Chowdhury" /></label>
+              <label>Student ID<input type="text" id="settings-id" placeholder="011 2024 062" /></label>
+              <label>Department<input type="text" id="settings-dept" placeholder="Computer Science & Engineering" /></label>
+              <label>Batch<input type="text" id="settings-batch" placeholder="Fall 2021" /></label>
+            </div>
+
+            <label class="bio">
+              Professional Bio
+              <textarea id="settings-bio" placeholder="Add a short bio for the community."></textarea>
+            </label>
+          </section>
+
+          <section class="card">
+            <h3>Notifications</h3>
+            <div class="toggle">
+              <div>
+                <strong>Push Notifications</strong>
+                <p>Receive real-time updates on new activity.</p>
+              </div>
+              <span class="switch on"></span>
+            </div>
+            <div class="toggle">
+              <div>
+                <strong>Email Digest</strong>
+                <p>Weekly roundup of likes and achievements.</p>
+              </div>
+              <span class="switch"></span>
+            </div>
+            <div class="toggle">
+              <div>
+                <strong>Contest Updates</strong>
+                <p>Get notified when new competitions open.</p>
+              </div>
+              <span class="switch on"></span>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>Appearance</h3>
+            <div class="theme-row">
+              <button class="theme active">Light</button>
+              <button class="theme">Dark</button>
+              <button class="theme">System</button>
+            </div>
+            <div class="color-row">
+              <span class="color teal"></span>
+              <span class="color mint"></span>
+              <span class="color coral"></span>
+              <span class="color sun"></span>
+            </div>
+          </section>
+
+          <section class="card danger">
+            <h3>Delete My Account</h3>
+            <p>Irreversible action. Your data will be removed from the Arena.</p>
+            <div class="actions">
+              <button class="chip">Export Data (JSON)</button>
+              <button class="chip danger">Delete My Account</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

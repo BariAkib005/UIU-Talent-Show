@@ -1,0 +1,73 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap");
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal-700: #0f6f71;
+  --teal-500: #2fb2a1;
+  --mint: #e6f7f5;
+  --text: #0f2f30;
+  --muted: #6b7d7e;
+  --bg: #f4fbfb;
+}
+
+body { font-family: "Manrope", sans-serif; background: var(--bg); color: var(--text); }
+
+.page { min-height: 100vh; padding: 24px 40px 40px; display: grid; gap: 24px; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { display: flex; gap: 10px; align-items: center; font-weight: 700; }
+.brand-mark { width: 28px; height: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; align-items: end; }
+.brand-mark span { background: linear-gradient(180deg, #9ff3e9, #42c2b1); border-radius: 6px 6px 2px 2px; display: block; }
+.brand-mark span:nth-child(1) { height: 10px; opacity: 0.5; }
+.brand-mark span:nth-child(2) { height: 18px; opacity: 0.8; }
+.brand-mark span:nth-child(3) { height: 14px; }
+
+.links { display: flex; gap: 16px; }
+.links a { text-decoration: none; color: var(--muted); font-weight: 600; }
+.links a.active { color: var(--teal-700); }
+
+.search { display: flex; gap: 8px; align-items: center; }
+.search input { border: 1px solid #dbe9ea; border-radius: 999px; padding: 8px 14px; }
+
+.content { display: grid; gap: 20px; }
+
+.hero { background: #ffffff; border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; box-shadow: 0 16px 30px rgba(10,45,45,0.04); }
+.hero h2 { font-size: 24px; margin-top: 6px; }
+.hero p { color: var(--muted); }
+.arena { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--teal-700); font-weight: 700; }
+.select { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+
+.top-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.podium { background: #ffffff; border-radius: 20px; padding: 16px; display: grid; gap: 8px; align-items: center; justify-items: center; box-shadow: 0 16px 30px rgba(10,45,45,0.04); }
+.podium.winner { border: 2px solid #f5c46a; }
+.rank { width: 30px; height: 30px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; font-weight: 700; color: var(--teal-700); }
+.avatar { width: 60px; height: 60px; border-radius: 50%; background: #dbeaea; display: grid; place-items: center; font-weight: 700; color: var(--teal-700); }
+.podium p { color: var(--muted); }
+
+.grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+.rankings { background: #ffffff; border-radius: 20px; padding: 20px; display: grid; gap: 10px; box-shadow: 0 16px 30px rgba(10,45,45,0.04); }
+.row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eef4f4; }
+.row:last-of-type { border-bottom: none; }
+.place { width: 28px; height: 28px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; color: var(--teal-700); font-weight: 700; }
+.score { font-weight: 700; color: var(--teal-700); }
+
+.side { display: grid; gap: 16px; }
+.cta { background: linear-gradient(135deg, #dff4f1, #eff8f8); border-radius: 20px; padding: 18px; display: grid; gap: 10px; }
+.formula, .hall { background: #ffffff; border-radius: 20px; padding: 16px; display: grid; gap: 10px; box-shadow: 0 16px 30px rgba(10,45,45,0.04); }
+.formula-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.tile { background: var(--mint); border-radius: 14px; padding: 12px; text-align: center; font-size: 12px; color: var(--teal-700); }
+
+.primary { border: none; border-radius: 999px; padding: 8px 14px; background: linear-gradient(135deg, var(--teal-700), var(--teal-500)); color: #ffffff; font-weight: 600; cursor: pointer; }
+.ghost { border: none; border-radius: 999px; padding: 8px 14px; background: var(--mint); color: var(--teal-700); font-weight: 600; cursor: pointer; }
+
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .topbar { flex-direction: column; align-items: flex-start; }
+  .top-three { grid-template-columns: 1fr; }
+  .hero { flex-direction: column; align-items: flex-start; }
+}

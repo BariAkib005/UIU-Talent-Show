@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIU Talent Show - OTP Verification</title>
+  <link rel="stylesheet" href="otp.css" />
+</head>
+<body>
+  <div class="otp-page">
+    <header class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="brand-text">
+        <h1>UIU Talent Show</h1>
+        <p>The Arena</p>
+      </div>
+    </header>
+
+    <div class="progress" aria-hidden="true">
+      <span class="active"></span>
+      <span class="active"></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <section class="card">
+      <div class="icon">Mail</div>
+      <h2>Check Your Inbox</h2>
+      <p>We sent a 6-digit verification code to</p>
+      <strong id="otp-email-display">name@bscse.uiu.ac.bd</strong>
+
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" placeholder="-" />
+        <input type="text" maxlength="1" placeholder="-" />
+        <input type="text" maxlength="1" placeholder="-" />
+        <input type="text" maxlength="1" placeholder="-" />
+        <input type="text" maxlength="1" placeholder="-" />
+        <input type="text" maxlength="1" placeholder="-" />
+      </div>
+
+      <p class="timer">Code expires in 04:32</p>
+      <p class="resend">Didn&apos;t receive the code? <a href="#">Resend Code</a></p>
+
+      <button type="button" id="verify-btn">Verify and Continue</button>
+      <a class="back" href="signup.html">Go back and change email</a>
+    </section>
+
+    <footer class="footer">This code is valid for 5 minutes and can only be used once.</footer>
+  </div>
+  <script src="js/auth.js" defer></script>
+</body>
+</html>

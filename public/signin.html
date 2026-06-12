@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIU Talent Show - Sign In</title>
+  <link rel="stylesheet" href="signin.css" />
+</head>
+<body>
+  <div class="auth-layout">
+    <aside class="hero">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="brand-text">
+          <h1>UIU Talent Show</h1>
+          <p>The Arena</p>
+        </div>
+      </div>
+
+      <div class="hero-copy">
+        <h2>Welcome Back to the Stage.</h2>
+        <p>
+          Sign in and continue your creative journey. Your audience is waiting
+          for your next big performance.
+        </p>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="label">Current Rank</span>
+          <strong>Top 5 Performer</strong>
+        </div>
+        <div class="stat-card">
+          <span class="label">Engagement Rate</span>
+          <strong>94%</strong>
+        </div>
+        <div class="stat-card">
+          <span class="label">Active Votes</span>
+          <strong>1,202</strong>
+        </div>
+      </div>
+
+      <p class="hero-footer">New to UIU Talent Show? <a href="signup.html">Create an account</a></p>
+    </aside>
+
+    <main class="form-panel">
+      <section class="form-card">
+        <h2>Good to see you again</h2>
+        <p class="sub">Enter your credentials to continue.</p>
+
+        <form class="signin-form">
+          <label>
+            UIU Student ID or UIU Mail
+            <input type="text" id="signin-email" placeholder="Enter your email or student ID" required />
+          </label>
+
+          <label>
+            Password
+            <div class="password-row">
+              <input type="password" id="signin-password" placeholder="Enter your password" required />
+              <button class="ghost" id="toggle-password" type="button">Show</button>
+            </div>
+          </label>
+
+          <div class="row">
+            <label class="checkbox">
+              <input type="checkbox" id="signin-remember" />
+              Remember me
+            </label>
+            <a class="link" href="#">Forgot Password?</a>
+          </div>
+
+          <button type="submit">Sign In</button>
+
+          <p class="helper">Don&apos;t have an account? <a href="signup.html">Create one</a></p>
+        </form>
+
+        <div class="trust">
+          <span class="lock"></span>
+          Secured by UIU Talent Show. Only for UIU students.
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="js/auth.js" defer></script>
+</body>
+</html>

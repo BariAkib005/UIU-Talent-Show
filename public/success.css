@@ -1,0 +1,152 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --teal-600: #0f7e80;
+  --teal-400: #3db8a7;
+  --mint: #e9f7f6;
+  --text: #103132;
+  --muted: #6f7f80;
+}
+
+body {
+  font-family: "Manrope", sans-serif;
+  background: radial-gradient(circle at top, #f4fbfb, #e6f3f3);
+  color: var(--text);
+}
+
+.success-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  gap: 24px;
+  padding: 40px 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  align-items: end;
+}
+
+.brand-mark span {
+  background: linear-gradient(180deg, #9ff3e9, #42c2b1);
+  border-radius: 6px 6px 2px 2px;
+  display: block;
+}
+
+.brand-mark span:nth-child(1) {
+  height: 16px;
+  opacity: 0.5;
+}
+
+.brand-mark span:nth-child(2) {
+  height: 28px;
+  opacity: 0.8;
+}
+
+.brand-mark span:nth-child(3) {
+  height: 22px;
+}
+
+.brand-text h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 36px 40px;
+  text-align: center;
+  width: min(460px, 100%);
+  box-shadow: 0 20px 40px rgba(10, 45, 45, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(61, 184, 167, 0.15);
+}
+
+.card::before {
+  top: -60px;
+  left: -40px;
+}
+
+.card::after {
+  bottom: -60px;
+  right: -40px;
+}
+
+.badge {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--mint);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--teal-600);
+}
+
+.card h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.actions {
+  display: grid;
+  gap: 12px;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  background: linear-gradient(135deg, var(--teal-600), var(--teal-400));
+  color: #ffffff;
+}
+
+.ghost {
+  background: #edf7f6;
+  color: var(--teal-600);
+}
+
+.footer {
+  font-size: 12px;
+  color: var(--muted);
+}
