@@ -63,7 +63,7 @@ const signin = async (req, res) => {
 
   try {
     const [users] = await db.query(
-      'SELECT id, NAME as name, email, student_id, department, batch, PASSWORD as password, is_verified, otp, created_at FROM users WHERE email = ?',
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, PASSWORD as password, is_verified, otp, created_at FROM users WHERE email = ?',
       [email]
     );
 
@@ -98,7 +98,9 @@ const signin = async (req, res) => {
         email: user.email,
         student_id: user.student_id,
         department: user.department,
-        batch: user.batch
+        batch: user.batch,
+        bio: user.bio,
+        profile_pic: user.profile_pic
       }
     });
   } catch (error) {
@@ -110,7 +112,7 @@ const signin = async (req, res) => {
 const me = async (req, res) => {
   try {
     const [users] = await db.query(
-      'SELECT id, NAME as name, email, student_id, department, batch, created_at FROM users WHERE id = ?',
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, created_at FROM users WHERE id = ?',
       [req.user.id]
     );
 
@@ -129,4 +131,48 @@ const logout = (req, res) => {
   return res.status(200).json({ success: true, message: 'Logged out successfully.' });
 };
 
-module.exports = { signup, signin, me, logout };
+const updateProfile = async (req, res) => {
+  const { name, bio, department, batch } = req.body;
+  const userId = req.user.id;
+
+  if (!name || !department || !batch) {
+    return res.status(400).json({ success: false, message: 'Name, department, and batch are required.' });
+  }
+
+  try {
+    let profilePicPath = null;
+    if (req.file) {
+      profilePicPath = `/uploads/${req.file.filename}`;
+    }
+
+    let query = 'UPDATE users SET name = ?, bio = ?, department = ?, batch = ?';
+    let params = [name, bio || null, department, batch];
+
+    if (profilePicPath) {
+      query += ', profile_pic = ?';
+      params.push(profilePicPath);
+    }
+
+    query += ' WHERE id = ?';
+    params.push(userId);
+
+    await db.query(query, params);
+
+    // Fetch the updated user
+    const [users] = await db.query(
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      user: users[0]
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+module.exports = { signup, signin, me, logout, updateProfile };

@@ -313,6 +313,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!isPublic) {
     currentUser = checkAuthentication();
     if (!currentUser) return;
+
+    // Fetch fresh user data from server
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        currentUser = data.user;
+      }
+    } catch (err) {
+      console.error('Failed to fetch fresh user details:', err);
+    }
   }
 
   // Bind Navigation Links across sidebar and header
@@ -411,12 +424,21 @@ function bindGlobalNavigation(user) {
   // Set Profile Avatar initials — skip the banner profile-avatar (has its own styling)
   const avatar = document.querySelector('.avatar:not(.profile-avatar)');
   if (avatar) {
-    avatar.textContent = user.name.charAt(0).toUpperCase();
+    if (user.profile_pic) {
+      avatar.style.backgroundImage = `url(${user.profile_pic})`;
+      avatar.style.backgroundSize = 'cover';
+      avatar.style.backgroundPosition = 'center';
+      avatar.textContent = '';
+      avatar.style.background = '';
+    } else {
+      avatar.style.backgroundImage = '';
+      avatar.textContent = user.name.charAt(0).toUpperCase();
+      avatar.style.background = 'linear-gradient(135deg, #0b5153, #35c4b3)';
+    }
     avatar.style.display = 'flex';
     avatar.style.alignItems = 'center';
     avatar.style.justifyContent = 'center';
     avatar.style.color = '#fff';
-    avatar.style.background = 'linear-gradient(135deg, #0b5153, #35c4b3)';
     avatar.style.fontWeight = 'bold';
     avatar.style.cursor = 'pointer';
     avatar.addEventListener('click', () => {
@@ -788,6 +810,7 @@ async function renderProfile(user) {
   // Target new banner-based profile HTML elements
   const nameEl = document.querySelector('.profile-name');
   const detailsEl = document.querySelector('.profile-dept');
+  const bioEl = document.querySelector('.profile-bio');
   const tagEl = document.querySelector('.talent-row .tag');
   const avatarEl = document.querySelector('.profile-avatar');
   const galleryEl = document.querySelector('.gallery, #profile-gallery');
@@ -799,9 +822,20 @@ async function renderProfile(user) {
   if (detailsEl) {
     detailsEl.textContent = `${user.department} • Batch ${user.batch}`;
   }
+  if (bioEl) {
+    bioEl.textContent = user.bio || 'No bio added yet. Click Edit Profile to add one!';
+  }
   if (avatarEl) {
-    const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    avatarEl.textContent = initials;
+    if (user.profile_pic) {
+      avatarEl.style.backgroundImage = `url(${user.profile_pic})`;
+      avatarEl.style.backgroundSize = 'cover';
+      avatarEl.style.backgroundPosition = 'center';
+      avatarEl.textContent = '';
+    } else {
+      avatarEl.style.backgroundImage = '';
+      const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      avatarEl.textContent = initials;
+    }
   }
 
   if (galleryEl) {
@@ -955,6 +989,87 @@ async function renderProfile(user) {
     // so content is immediately visible regardless of which tab is active
     if (galleryEl) {
       await filterAndRender('all posts');
+    }
+
+    // --- EDIT PROFILE MODAL LOGIC ---
+    const editBtn = document.querySelector('.edit-profile-btn');
+    const editModal = document.getElementById('edit-profile-modal');
+    const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const editProfileForm = document.getElementById('edit-profile-form');
+
+    if (editBtn && editModal) {
+      // Open modal & populate inputs
+      editBtn.addEventListener('click', () => {
+        document.getElementById('edit-profile-name').value = user.name || '';
+        document.getElementById('edit-profile-bio').value = user.bio || '';
+        document.getElementById('edit-profile-dept').value = user.department || 'CSE';
+        document.getElementById('edit-profile-batch').value = user.batch || 'Fall 2023';
+        editModal.style.display = 'flex';
+      });
+
+      // Close modal
+      const closeModal = () => {
+        editModal.style.display = 'none';
+        editProfileForm.reset();
+      };
+
+      closeEditModalBtn?.addEventListener('click', closeModal);
+      cancelEditBtn?.addEventListener('click', closeModal);
+
+      // Handle submit
+      editProfileForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('edit-profile-name').value.trim();
+        const bio = document.getElementById('edit-profile-bio').value.trim();
+        const department = document.getElementById('edit-profile-dept').value;
+        const batch = document.getElementById('edit-profile-batch').value;
+        const fileInput = document.getElementById('edit-profile-pic');
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('bio', bio);
+        formData.append('department', department);
+        formData.append('batch', batch);
+        if (fileInput.files.length > 0) {
+          formData.append('profile_pic', fileInput.files[0]);
+        }
+
+        const submitBtn = editProfileForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch('/api/auth/update-profile', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const resData = await response.json();
+          if (resData.success) {
+            showToast('Profile updated successfully!', 'success');
+            
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            showToast(resData.message || 'Failed to update profile.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Server error. Failed to update profile.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
+        }
+      });
     }
 
   } catch (err) {

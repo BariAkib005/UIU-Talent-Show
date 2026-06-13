@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,        -- Hashed password (bcrypt)
     is_verified BOOLEAN DEFAULT FALSE,
     otp VARCHAR(6) NULL,                   -- Temporary code for simulation
+    bio TEXT NULL,
+    profile_pic VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
