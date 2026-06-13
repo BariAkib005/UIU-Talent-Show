@@ -28,11 +28,11 @@ function showToast(message, type = 'success') {
   })();
 
   const toast = document.createElement('div');
-  toast.style.background = type === 'error' ? '#ff4a5a' : '#13131a';
+  toast.style.background = type === 'error' ? '#ff4a5a' : '#0b5153';
   toast.style.color = '#fff';
   toast.style.padding = '12px 20px';
   toast.style.borderRadius = '8px';
-  toast.style.border = type === 'error' ? 'none' : '1px solid #ff4a5a';
+  toast.style.border = type === 'error' ? 'none' : '1px solid #35c4b3';
   toast.style.fontSize = '0.9rem';
   toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
   toast.style.opacity = '0';
@@ -515,7 +515,7 @@ async function renderTrendingFeed() {
             <h3>${escapeHtml(spotlight.title)}</h3>
             <p>${escapeHtml(spotlight.description || 'No description provided.')}</p>
             <div class="author">
-              <span class="avatar" style="background:#ff4a5a; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+              <span class="avatar" style="background:var(--gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">
                 ${initials}
               </span>
               <div>
@@ -557,7 +557,7 @@ async function renderTrendingFeed() {
               <div style="font-weight:600; font-size:0.9rem; color:inherit;">${escapeHtml(perf.title)}</div>
               <div style="font-size:0.75rem; color:var(--muted); display:flex; justify-content:space-between; align-items:center;">
                 <span>by ${escapeHtml(perf.performer_name)}</span>
-                <span style="color:#ff4a5a; font-weight:bold;">${perf.points} pts</span>
+                <span style="color:var(--teal-800); font-weight:bold;">${perf.points} pts</span>
               </div>
             `;
             item.addEventListener('click', () => openPerformanceModal(perf.id));
@@ -680,10 +680,10 @@ async function renderLeaderboard() {
           const initials = second.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
           secondCard.innerHTML = `
             <span class="rank">2</span>
-            <div class="avatar" style="background:#ff4a5a; color:#fff;">${initials}</div>
+            <div class="avatar" style="background:var(--gradient); color:#fff;">${initials}</div>
             <h3>${escapeHtml(second.creator_name)}</h3>
-            <p style="font-size:0.8rem; color:#888; margin-top:2px;">${escapeHtml(second.department)}</p>
-            <strong style="color:#ff4a5a; font-size:1.1rem; margin-top:4px;">${second.total_points} pts</strong>
+            <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(second.department)}</p>
+            <strong style="color:var(--teal-800); font-size:1.1rem; margin-top:4px;">${second.total_points} pts</strong>
           `;
         } else {
           secondCard.style.opacity = '0.5';
@@ -703,10 +703,10 @@ async function renderLeaderboard() {
           const initials = first.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
           firstCard.innerHTML = `
             <span class="rank">1</span>
-            <div class="avatar" style="background:#ff4a5a; color:#fff; width:70px; height:70px; font-size:1.4rem; border:2px solid #fff; box-shadow:0 0 10px rgba(255,74,90,0.3);">${initials}</div>
+            <div class="avatar" style="background:var(--gradient); color:#fff; width:70px; height:70px; font-size:1.4rem; border:2px solid var(--border-color); box-shadow:0 0 10px rgba(15,138,126,0.2);">${initials}</div>
             <h3 style="font-size:1.3rem;">${escapeHtml(first.creator_name)}</h3>
-            <p style="font-size:0.8rem; color:#888; margin-top:2px;">${escapeHtml(first.department)}</p>
-            <strong style="color:#ff4a5a; font-size:1.25rem; margin-top:4px;">${first.total_points} pts</strong>
+            <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(first.department)}</p>
+            <strong style="color:var(--teal-800); font-size:1.25rem; margin-top:4px;">${first.total_points} pts</strong>
           `;
         } else {
           firstCard.style.opacity = '0.5';
@@ -726,10 +726,10 @@ async function renderLeaderboard() {
           const initials = third.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
           thirdCard.innerHTML = `
             <span class="rank">3</span>
-            <div class="avatar" style="background:#ff4a5a; color:#fff;">${initials}</div>
+            <div class="avatar" style="background:var(--gradient); color:#fff;">${initials}</div>
             <h3>${escapeHtml(third.creator_name)}</h3>
-            <p style="font-size:0.8rem; color:#888; margin-top:2px;">${escapeHtml(third.department)}</p>
-            <strong style="color:#ff4a5a; font-size:1.1rem; margin-top:4px;">${third.total_points} pts</strong>
+            <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(third.department)}</p>
+            <strong style="color:var(--teal-800); font-size:1.1rem; margin-top:4px;">${third.total_points} pts</strong>
           `;
         } else {
           thirdCard.style.opacity = '0.5';
@@ -752,18 +752,18 @@ async function renderLeaderboard() {
           rest.forEach((creator, idx) => {
             const row = document.createElement('div');
             row.className = 'row';
-            row.style.borderBottom = '1px solid #eef4f4';
+            row.style.borderBottom = '1px solid var(--border-color)';
             row.style.padding = '12px 0';
             
             row.innerHTML = `
               <span class="place">${idx + 4}</span>
               <div style="display:flex; flex-direction:column; gap:2px; text-align:left;">
                 <strong style="color:inherit; font-size:0.95rem;">${escapeHtml(creator.creator_name)}</strong>
-                <span style="font-size:0.75rem; color:#888;">${escapeHtml(creator.department)} | ${escapeHtml(creator.batch)}</span>
+                <span style="font-size:0.75rem; color:var(--muted);">${escapeHtml(creator.department)} | ${escapeHtml(creator.batch)}</span>
               </div>
               <div style="display:flex; align-items:center; gap:12px; font-weight:700;">
-                <span style="font-size:0.8rem; color:#666; font-weight:normal;">${creator.total_likes} 👍 | ${creator.total_comments} 💬</span>
-                <span class="score" style="color:#ff4a5a;">${creator.total_points} pts</span>
+                <span style="font-size:0.8rem; color:var(--muted); font-weight:normal;">${creator.total_likes} 👍 | ${creator.total_comments} 💬</span>
+                <span class="score" style="color:var(--teal-800);">${creator.total_points} pts</span>
               </div>
             `;
             listContainer.appendChild(row);
@@ -1318,12 +1318,12 @@ document.body.addEventListener('click', async (e) => {
         modal.style.padding = '24px';
 
         modal.innerHTML = `
-          <div style="background:#13131a; border:1px solid #222; border-radius:16px; padding:32px; max-width:700px; width:100%; max-height:85vh; overflow-y:auto; position:relative;">
-            <button class="close-modal-btn" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#ff4a5a; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <span style="color:#ff4a5a; font-size:0.8rem; font-weight:bold; text-transform:uppercase;">📝 Blog Submission</span>
-            <h2 style="color:#fff; margin:12px 0 6px 0;">${escapeHtml(perf.title)}</h2>
-            <p style="color:#666; font-size:0.85rem; margin:0 0 20px 0;">by ${escapeHtml(perf.performer_name)} | ${escapeHtml(perf.department)}</p>
-            <div style="color:#d0d0e0; font-size:0.95rem; line-height:1.6; white-space:pre-wrap;">${escapeHtml(perf.blog_content)}</div>
+          <div style="background:var(--card); border:1px solid var(--border-color); border-radius:20px; padding:32px; max-width:700px; width:100%; max-height:85vh; overflow-y:auto; position:relative; box-shadow: 0 16px 60px rgba(0,0,0,0.1);">
+            <button class="close-modal-btn" style="position:absolute; top:20px; right:20px; background:var(--mint-solid); border:none; color:var(--teal-800); font-size:1.5rem; cursor:pointer; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
+            <span style="color:var(--teal-800); font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; background:var(--mint-solid); padding:4px 14px; border-radius:20px; display:inline-block;">📝 Blog Submission</span>
+            <h2 style="color:var(--text); margin:14px 0 6px 0; font-family:'Playfair Display',serif;">${escapeHtml(perf.title)}</h2>
+            <p style="color:var(--muted); font-size:0.85rem; margin:0 0 20px 0;">by ${escapeHtml(perf.performer_name)} | ${escapeHtml(perf.department)}</p>
+            <div style="color:var(--text); font-size:0.95rem; line-height:1.6; white-space:pre-wrap; text-align:left;">${escapeHtml(perf.blog_content)}</div>
           </div>
         `;
 

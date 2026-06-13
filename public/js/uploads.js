@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ['dragenter', 'dragover'].forEach(eventName => {
       dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = '#ff4a5a'; // Highlight border
+        dropZone.style.borderColor = '#35c4b3'; // Highlight border
       }, false);
     });
 

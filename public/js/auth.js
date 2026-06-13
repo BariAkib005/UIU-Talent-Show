@@ -14,11 +14,11 @@ function showToast(message, type = 'success') {
   })();
 
   const toast = document.createElement('div');
-  toast.style.background = type === 'error' ? '#ff4a5a' : '#13131a';
+  toast.style.background = type === 'error' ? '#ff4a5a' : '#0b5153';
   toast.style.color = '#fff';
   toast.style.padding = '12px 20px';
   toast.style.borderRadius = '8px';
-  toast.style.border = type === 'error' ? 'none' : '1px solid #ff4a5a';
+  toast.style.border = type === 'error' ? 'none' : '1px solid #35c4b3';
   toast.style.fontSize = '0.9rem';
   toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
   toast.style.opacity = '0';
