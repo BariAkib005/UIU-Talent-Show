@@ -183,8 +183,8 @@ textarea::placeholder {
 
 /* ── Avatar base ── */
 .avatar {
-  background: var(--gradient) !important;
-  color: #ffffff !important;
+  background: var(--gradient);
+  color: #ffffff;
 }
 
 /* ── Podium cards ── */

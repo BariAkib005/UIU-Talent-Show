@@ -435,11 +435,11 @@ function bindGlobalNavigation(user) {
   const avatar = document.querySelector('.avatar:not(.profile-avatar)');
   if (avatar) {
     if (user.profile_pic) {
+      avatar.style.background = 'none';
       avatar.style.backgroundImage = `url(${user.profile_pic})`;
       avatar.style.backgroundSize = 'cover';
       avatar.style.backgroundPosition = 'center';
       avatar.textContent = '';
-      avatar.style.background = '';
     } else {
       avatar.style.backgroundImage = '';
       avatar.textContent = user.name.charAt(0).toUpperCase();
@@ -866,6 +866,7 @@ async function renderProfile(user) {
   }
   if (avatarEl) {
     if (user.profile_pic) {
+      avatarEl.style.background = 'none';
       avatarEl.style.backgroundImage = `url(${user.profile_pic})`;
       avatarEl.style.backgroundSize = 'cover';
       avatarEl.style.backgroundPosition = 'center';
