@@ -124,8 +124,13 @@ async function openPerformanceModal(perfId) {
           </div>
         `;
       } else if (perf.type === 'blog') {
+        let coverImageHTML = '';
+        if (perf.file_path) {
+          coverImageHTML = `<img src="${safeFilePath}" style="width:100%; max-height:220px; object-fit:cover; border-radius:8px; margin-bottom:16px; display:block;" alt="Blog Cover" />`;
+        }
         mediaHTML = `
-          <div style="background: #171724; border: 1px solid #333; padding: 24px; border-radius: 12px; max-height: 50vh; overflow-y: auto; text-align: left; white-space: pre-wrap; line-height: 1.6; color: #d0d0e0;">
+          <div style="background: var(--mint-solid); border: 1px solid var(--border-color); padding: 24px; border-radius: 12px; max-height: 50vh; overflow-y: auto; text-align: left; white-space: pre-wrap; line-height: 1.6; color: var(--text);">
+            ${coverImageHTML}
             ${escapeHtml(perf.blog_content || perf.description || '')}
           </div>
         `;
@@ -220,10 +225,15 @@ function renderPerformanceCard(perf, hasVoted, viewType, index = 0) {
         </div>
       `;
     } else if (perf.type === 'blog') {
+      let coverImageHTML = '';
+      if (perf.file_path) {
+        coverImageHTML = `<img src="${safeFilePath}" style="width:100%; max-height:160px; object-fit:cover; border-radius:8px 8px 0 0; margin-bottom:12px; display:block;" alt="Blog Cover" />`;
+      }
       mediaSection = `
-        <div class="post-media" style="background:var(--mint-solid); padding:18px; overflow-y:auto; color:var(--muted); text-align:left; font-size:0.85rem;">
+        <div class="post-media" style="background:var(--mint-solid); padding:18px; overflow-y:auto; color:var(--muted); text-align:left; font-size:0.85rem; display:flex; flex-direction:column;">
+          ${coverImageHTML}
           <h4 style="color:var(--text); margin-bottom:8px; font-size:1.1rem;">${safeTitle}</h4>
-          <p style="white-space: pre-wrap; line-height: 1.5;">${safeBlogExcerpt}</p>
+          <p style="white-space: pre-wrap; line-height: 1.5; flex:1;">${safeBlogExcerpt}</p>
           <a href="#" class="read-blog-btn" data-id="${perf.id}" style="color:var(--teal-800); text-decoration:none; display:inline-block; margin-top:8px; font-weight:bold;">Read Full Article &rarr;</a>
         </div>
       `;
@@ -1435,8 +1445,9 @@ document.body.addEventListener('click', async (e) => {
         modal.innerHTML = `
           <div style="background:var(--card); border:1px solid var(--border-color); border-radius:20px; padding:32px; max-width:700px; width:100%; max-height:85vh; overflow-y:auto; position:relative; box-shadow: 0 16px 60px rgba(0,0,0,0.1);">
             <button class="close-modal-btn" style="position:absolute; top:20px; right:20px; background:var(--mint-solid); border:none; color:var(--teal-800); font-size:1.5rem; cursor:pointer; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
-            <span style="color:var(--teal-800); font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; background:var(--mint-solid); padding:4px 14px; border-radius:20px; display:inline-block;">📝 Blog Submission</span>
-            <h2 style="color:var(--text); margin:14px 0 6px 0; font-family:'Playfair Display',serif;">${escapeHtml(perf.title)}</h2>
+            <span style="color:var(--teal-800); font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; background:var(--mint-solid); padding:4px 14px; border-radius:20px; display:inline-block; margin-bottom:16px;">📝 Blog Submission</span>
+            ${perf.file_path ? `<img src="${encodeURI(perf.file_path)}" style="width:100%; max-height:260px; object-fit:cover; border-radius:12px; margin-bottom:20px; display:block;" alt="Blog Cover" />` : ''}
+            <h2 style="color:var(--text); margin:0 0 6px 0; font-family:'Playfair Display',serif;">${escapeHtml(perf.title)}</h2>
             <p style="color:var(--muted); font-size:0.85rem; margin:0 0 20px 0;">by ${escapeHtml(perf.performer_name)} | ${escapeHtml(perf.department)}</p>
             <div style="color:var(--text); font-size:0.95rem; line-height:1.6; white-space:pre-wrap; text-align:left;">${escapeHtml(perf.blog_content)}</div>
           </div>

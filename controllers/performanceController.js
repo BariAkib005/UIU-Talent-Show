@@ -24,6 +24,9 @@ const uploadPerformance = async (req, res) => {
     }
     // Save relative path for easy frontend referencing
     file_path = `/uploads/${req.file.filename}`;
+  } else if (type === 'blog' && req.file) {
+    // Save optional cover image path for blogs
+    file_path = `/uploads/${req.file.filename}`;
   }
 
   try {

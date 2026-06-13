@@ -30,11 +30,12 @@
         <button class="close" onclick="window.location.href='home.html'">X</button>
       </div>
 
-      <div class="upload-area">
+      <div class="upload-area" id="drop-zone">
         <div class="icon">Cover</div>
-        <p>Upload Cover Image</p>
+        <p id="file-status">Upload Cover Image</p>
         <span>Recommended 1200 x 450px</span>
-        <button class="ghost" type="button">Select File</button>
+        <button class="ghost" id="select-file-btn" type="button">Select File</button>
+        <input type="file" id="media-file" accept="image/*" style="display: none;" />
       </div>
 
       <div class="grid">

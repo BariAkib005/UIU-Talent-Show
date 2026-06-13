@@ -113,20 +113,23 @@ document.addEventListener('DOMContentLoaded', () => {
           publishBtn.disabled = true;
           publishBtn.textContent = 'Publishing...';
 
+          const formData = new FormData();
+          formData.append('title', title);
+          formData.append('description', '');
+          formData.append('category', category);
+          formData.append('tags', tags);
+          formData.append('type', 'blog');
+          formData.append('blog_content', content);
+          if (selectedFile) {
+            formData.append('media', selectedFile);
+          }
+
           response = await fetch('/api/performances/upload', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-              title,
-              description: '',
-              category,
-              tags,
-              type: 'blog',
-              blog_content: content
-            })
+            body: formData
           });
         }
 
