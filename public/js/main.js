@@ -492,6 +492,7 @@ async function renderHomeDashboard(user) {
     }
 
     renderSidebarLeaderboard();
+    renderWeeklyPoll(user);
   } catch (err) {
     console.error('Home dashboard error:', err);
     feedContainer.innerHTML = '<div style="color:#ff4a5a; text-align:center; padding:40px;">Failed to load feed. Server error.</div>';
@@ -687,11 +688,39 @@ async function renderLeaderboard() {
   const listContainer = document.getElementById('leaderboard-list');
   if (!podiumContainer && !listContainer) return;
 
+  // Populate dynamic arena periods
+  const periodSelect = document.getElementById('arena-period-select');
+  if (periodSelect && periodSelect.options.length === 0) {
+    periodSelect.innerHTML = '';
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const currentDate = new Date();
+    
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const monthName = months[d.getMonth()];
+      const year = d.getFullYear();
+      const label = `${monthName} ${year}` + (i === 0 ? ' (Active)' : '');
+      const opt = document.createElement('option');
+      opt.value = `${year}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      opt.textContent = label;
+      periodSelect.appendChild(opt);
+    }
+
+    periodSelect.addEventListener('change', () => {
+      const selectedText = periodSelect.options[periodSelect.selectedIndex].text;
+      showToast(`Viewing standings for ${selectedText}`, 'success');
+      renderLeaderboard();
+    });
+  }
+
+  const selectedPeriod = periodSelect ? periodSelect.value : '';
+
   if (podiumContainer) podiumContainer.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#666;">Loading podium...</div>';
   if (listContainer) listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Loading rankings...</div>';
 
   try {
-    const response = await fetch('/api/votes/leaderboard');
+    const url = selectedPeriod ? `/api/votes/leaderboard?period=${selectedPeriod}` : '/api/votes/leaderboard';
+    const response = await fetch(url);
     const data = await response.json();
 
     if (data.success && data.leaderboard.length > 0) {
@@ -1127,7 +1156,9 @@ async function renderSidebarLeaderboard() {
   if (!leaderboardSection) return;
 
   try {
-    const response = await fetch('/api/votes/leaderboard');
+    const currentDate = new Date();
+    const currentPeriod = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    const response = await fetch(`/api/votes/leaderboard?period=${currentPeriod}`);
     const data = await response.json();
 
     if (data.success && data.leaderboard.length > 0) {
@@ -1502,3 +1533,202 @@ async function logoutUser() {
   localStorage.removeItem('user');
   window.location.href = 'signin.html';
 }
+
+// --- WEEKLY CREATOR POLL MODULE ---
+
+function openWeeklyPollModal(candidates, onVoteCast) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.left = '0';
+  modal.style.width = '100vw';
+  modal.style.height = '100vh';
+  modal.style.background = 'rgba(0, 0, 0, 0.7)';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.zIndex = '99999';
+  modal.style.padding = '24px';
+
+  let candidatesHTML = '';
+  if (candidates.length === 0) {
+    candidatesHTML = '<p style="color:#666; text-align:center; padding:20px;">No creators are active this week to vote for.</p>';
+  } else {
+    candidates.forEach(creator => {
+      candidatesHTML += `
+        <label style="display:flex; align-items:center; gap:12px; padding:12px; border:1.5px solid var(--border-color); border-radius:12px; margin-bottom:10px; cursor:pointer; background:var(--card); transition: border-color 0.2s; box-sizing: border-box; width:100%;">
+          <input type="radio" name="creator-poll-option" value="${creator.candidate_id}" style="accent-color:var(--teal-800); width:18px; height:18px; cursor:pointer;">
+          <div style="text-align:left;">
+            <strong style="color:var(--teal-800); font-size:0.95rem; display:block;">${escapeHtml(creator.candidate_name)}</strong>
+            <span style="font-size:0.75rem; color:var(--muted);">${escapeHtml(creator.department)} | ${escapeHtml(creator.batch)}</span>
+          </div>
+        </label>
+      `;
+    });
+  }
+
+  modal.innerHTML = `
+    <div style="background:#ffffff; border-radius:24px; max-width:450px; width:100%; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.15); position:relative; text-align:center; box-sizing: border-box;">
+      <button class="close-modal-btn" style="position:absolute; top:20px; right:20px; background:var(--mint-solid); border:none; color:var(--teal-800); font-size:1.5rem; cursor:pointer; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
+      <h3 style="color:var(--teal-800); margin-bottom:8px; font-size:1.4rem;">Weekly Creator Poll</h3>
+      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:20px;">Select your favorite creator of the week and cast your vote.</p>
+      
+      <form id="weekly-poll-form" style="max-height:300px; overflow-y:auto; padding-right:4px; margin-bottom:20px; display:flex; flex-direction:column; align-items:stretch; width:100%; box-sizing: border-box;">
+        ${candidatesHTML}
+      </form>
+      
+      <button type="button" class="primary" id="submit-poll-vote-btn" style="width: 100%; height:42px; border-radius:20px; font-weight:600;" ${candidates.length === 0 ? 'disabled' : ''}>Submit Vote</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () => modal.remove();
+  modal.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+  modal.addEventListener('click', (ev) => {
+    if (ev.target === modal) closeModal();
+  });
+
+  const submitBtn = modal.querySelector('#submit-poll-vote-btn');
+  submitBtn.addEventListener('click', async () => {
+    const selected = modal.querySelector('input[name="creator-poll-option"]:checked');
+    if (!selected) {
+      showToast('Please select a creator to vote for.', 'error');
+      return;
+    }
+    const candidateId = selected.value;
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/votes/poll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ candidateId })
+      });
+      const resData = await response.json();
+      if (resData.success) {
+        showToast('Vote cast successfully!', 'success');
+        closeModal();
+        if (onVoteCast) onVoteCast();
+      } else {
+        showToast(resData.message || 'Failed to submit vote.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Vote';
+      }
+    } catch (err) {
+      console.error('Submit poll vote error:', err);
+      showToast('Failed to connect to the server.', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Vote';
+    }
+  });
+}
+
+async function renderWeeklyPoll(user) {
+  const pollSection = document.querySelector('.poll');
+  if (!pollSection) return;
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/votes/poll/status', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    const data = await response.json();
+
+    if (!data.success) {
+      pollSection.innerHTML = `
+        <h3>Active Poll Phase</h3>
+        <p style="color:#ff4a5a; font-size:0.85rem;">Failed to load poll data.</p>
+      `;
+      return;
+    }
+
+    const { hasVoted, votedCandidateId, candidates } = data;
+
+    if (!user) {
+      let resultsHTML = '';
+      const totalVotes = candidates.reduce((sum, c) => sum + (c.vote_count || 0), 0);
+
+      candidates.slice(0, 5).forEach(c => {
+        const percentage = totalVotes > 0 ? Math.round((c.vote_count / totalVotes) * 100) : 0;
+        resultsHTML += `
+          <div style="margin-bottom: 12px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem;">
+              <strong style="color:var(--teal-800);">${escapeHtml(c.candidate_name)}</strong>
+              <span style="color:var(--muted);">${c.vote_count} votes (${percentage}%)</span>
+            </div>
+            <div style="background:var(--mint-solid); height:8px; border-radius:4px; overflow:hidden;">
+              <div style="background:var(--teal-800); width:${percentage}%; height:100%; border-radius:4px;"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      pollSection.innerHTML = `
+        <h3>Active Poll Phase</h3>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom: 16px;">Vote standings for this week. Log in to vote!</p>
+        <div style="margin-bottom: 16px;">
+          ${resultsHTML || '<p style="color:#666; font-size:0.8rem; text-align:center;">No votes cast yet.</p>'}
+        </div>
+        <button class="primary" style="width:100%; height:38px; border-radius:20px; font-weight:600;" onclick="window.location.href='signin.html'">Sign In to Vote</button>
+      `;
+      return;
+    }
+
+    if (hasVoted) {
+      let resultsHTML = '';
+      const totalVotes = candidates.reduce((sum, c) => sum + (c.vote_count || 0), 0);
+
+      candidates.slice(0, 5).forEach(c => {
+        const percentage = totalVotes > 0 ? Math.round((c.vote_count / totalVotes) * 100) : 0;
+        const isUserVote = c.candidate_id === votedCandidateId;
+        resultsHTML += `
+          <div style="margin-bottom: 12px; ${isUserVote ? 'background: #f0faf8; padding: 6px 8px; border-radius: 8px; border: 1px dashed var(--teal-800);' : ''}">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem;">
+              <strong style="color:var(--teal-800);">${escapeHtml(c.candidate_name)} ${isUserVote ? '⭐ (Your Vote)' : ''}</strong>
+              <span style="color:var(--muted);">${c.vote_count} votes (${percentage}%)</span>
+            </div>
+            <div style="background:var(--mint-solid); height:8px; border-radius:4px; overflow:hidden;">
+              <div style="background:var(--teal-800); width:${percentage}%; height:100%; border-radius:4px;"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      pollSection.innerHTML = `
+        <h3>Active Poll Phase</h3>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:16px;">Thank you for voting! Here are the current standings:</p>
+        <div style="margin-bottom: 16px;">
+          ${resultsHTML || '<p style="color:#666; font-size:0.8rem; text-align:center;">No votes cast yet.</p>'}
+        </div>
+        <div style="font-size:0.75rem; text-align:center; color:var(--teal-800); font-weight:600; background:var(--mint-solid); padding:8px; border-radius:12px;">
+          🗳️ You have voted for this week's poll.
+        </div>
+      `;
+    } else {
+      pollSection.innerHTML = `
+        <h3>Active Poll Phase</h3>
+        <p style="margin-bottom: 16px;">Vote for your favorite creator this week.</p>
+        <button class="primary" id="cast-vote-btn" style="width: 100%; height:38px; border-radius:20px; font-weight:600;">Cast Your Vote</button>
+      `;
+
+      pollSection.querySelector('#cast-vote-btn').addEventListener('click', () => {
+        openWeeklyPollModal(candidates, () => {
+          renderWeeklyPoll(user);
+        });
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load weekly poll status:', err);
+    pollSection.innerHTML = `
+      <h3>Active Poll Phase</h3>
+      <p style="color:#ff4a5a; font-size:0.85rem;">Failed to load poll data.</p>
+    `;
+  }
+}
+

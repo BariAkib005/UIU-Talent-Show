@@ -140,7 +140,9 @@ const getComments = async (req, res) => {
 
 const getLeaderboard = async (req, res) => {
   try {
-    const [ranking] = await db.query(`
+    const { period } = req.query; // format: 'YYYY-MM'
+    
+    let queryStr = `
       SELECT 
         u.id AS user_id, 
         u.NAME AS creator_name, 
@@ -152,21 +154,51 @@ const getLeaderboard = async (req, res) => {
         (COALESCE(SUM(like_counts.cnt), 0) * 1 + COALESCE(SUM(comment_counts.cnt), 0) * 2) AS total_points
       FROM users u
       JOIN submissions s ON u.id = s.user_id
-      LEFT JOIN (
-        SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
-      ) like_counts ON s.id = like_counts.submission_id
-      LEFT JOIN (
-        -- Only count comments made by users other than the submission author to prevent self-spamming
-        SELECT c.submission_id, COUNT(*) as cnt 
-        FROM comments c
-        JOIN submissions sub ON c.submission_id = sub.id
-        WHERE c.user_id != sub.user_id
-        GROUP BY c.submission_id
-      ) comment_counts ON s.id = comment_counts.submission_id
+    `;
+    
+    const queryParams = [];
+    
+    if (period) {
+      queryStr += `
+        LEFT JOIN (
+          SELECT submission_id, COUNT(*) as cnt 
+          FROM likes 
+          WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
+          GROUP BY submission_id
+        ) like_counts ON s.id = like_counts.submission_id
+        LEFT JOIN (
+          -- Only count comments made by users other than the submission author to prevent self-spamming
+          SELECT c.submission_id, COUNT(*) as cnt 
+          FROM comments c
+          JOIN submissions sub ON c.submission_id = sub.id
+          WHERE c.user_id != sub.user_id AND DATE_FORMAT(c.created_at, '%Y-%m') = ?
+          GROUP BY c.submission_id
+        ) comment_counts ON s.id = comment_counts.submission_id
+        WHERE DATE_FORMAT(s.created_at, '%Y-%m') = ?
+      `;
+      queryParams.push(period, period, period);
+    } else {
+      queryStr += `
+        LEFT JOIN (
+          SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
+        ) like_counts ON s.id = like_counts.submission_id
+        LEFT JOIN (
+          -- Only count comments made by users other than the submission author to prevent self-spamming
+          SELECT c.submission_id, COUNT(*) as cnt 
+          FROM comments c
+          JOIN submissions sub ON c.submission_id = sub.id
+          WHERE c.user_id != sub.user_id
+          GROUP BY c.submission_id
+        ) comment_counts ON s.id = comment_counts.submission_id
+      `;
+    }
+    
+    queryStr += `
       GROUP BY u.id
       ORDER BY total_points DESC, total_likes DESC, total_submissions DESC, u.NAME ASC
-    `);
-
+    `;
+    
+    const [ranking] = await db.query(queryStr, queryParams);
     return res.status(200).json({ success: true, leaderboard: ranking });
   } catch (error) {
     console.error('Leaderboard query error:', error);
@@ -174,4 +206,113 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
-module.exports = { castVote, getUserVotes, addComment, getComments, getLeaderboard };
+const getWeekStartDate = (d = new Date()) => {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(date.setDate(diff));
+  return monday.toISOString().split('T')[0];
+};
+
+const getPollStatus = async (req, res) => {
+  try {
+    const weekStart = getWeekStartDate();
+    let hasVoted = false;
+    let votedCandidateId = null;
+
+    if (req.user) {
+      const [votes] = await db.query(
+        'SELECT candidate_id FROM weekly_poll_votes WHERE voter_id = ? AND week_start = ? LIMIT 1',
+        [req.user.id, weekStart]
+      );
+      if (votes.length > 0) {
+        hasVoted = true;
+        votedCandidateId = votes[0].candidate_id;
+      }
+    }
+
+    const [candidates] = await db.query(`
+      SELECT 
+        u.id AS candidate_id, 
+        u.name AS candidate_name, 
+        u.department, 
+        u.batch,
+        COALESCE(vote_counts.cnt, 0) AS vote_count
+      FROM users u
+      JOIN submissions s ON u.id = s.user_id
+      LEFT JOIN (
+        SELECT candidate_id, COUNT(*) AS cnt 
+        FROM weekly_poll_votes 
+        WHERE week_start = ?
+        GROUP BY candidate_id
+      ) vote_counts ON u.id = vote_counts.candidate_id
+      GROUP BY u.id
+      ORDER BY vote_count DESC, u.name ASC
+    `, [weekStart]);
+
+    return res.status(200).json({
+      success: true,
+      weekStart,
+      hasVoted,
+      votedCandidateId,
+      candidates
+    });
+  } catch (error) {
+    console.error('Fetch weekly poll status error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch weekly poll status.' });
+  }
+};
+
+const castPollVote = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized. Please sign in to vote.' });
+    }
+
+    const { candidateId } = req.body;
+    if (!candidateId) {
+      return res.status(400).json({ success: false, message: 'Candidate ID is required.' });
+    }
+
+    if (parseInt(candidateId) === parseInt(req.user.id)) {
+      return res.status(400).json({ success: false, message: 'You cannot vote for yourself in the weekly poll.' });
+    }
+
+    const weekStart = getWeekStartDate();
+
+    // Check if voter already voted this week
+    const [existingVote] = await db.query(
+      'SELECT id FROM weekly_poll_votes WHERE voter_id = ? AND week_start = ? LIMIT 1',
+      [req.user.id, weekStart]
+    );
+
+    if (existingVote.length > 0) {
+      return res.status(400).json({ success: false, message: "You have already voted in this week's poll." });
+    }
+
+    // Check if candidate exists and is a creator (has submissions)
+    const [candidateCheck] = await db.query(`
+      SELECT DISTINCT u.id 
+      FROM users u
+      JOIN submissions s ON u.id = s.user_id
+      WHERE u.id = ? LIMIT 1
+    `, [candidateId]);
+
+    if (candidateCheck.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid candidate. Only creators can be voted for.' });
+    }
+
+    await db.query(
+      'INSERT INTO weekly_poll_votes (voter_id, candidate_id, week_start) VALUES (?, ?, ?)',
+      [req.user.id, candidateId, weekStart]
+    );
+
+    return res.status(200).json({ success: true, message: 'Vote cast successfully!' });
+  } catch (error) {
+    console.error('Cast weekly poll vote error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to cast weekly poll vote.' });
+  }
+};
+
+module.exports = { castVote, getUserVotes, addComment, getComments, getLeaderboard, getPollStatus, castPollVote };
+

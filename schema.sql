@@ -53,3 +53,16 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
 );
+
+-- 5. Weekly Poll Votes Table
+CREATE TABLE IF NOT EXISTS weekly_poll_votes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    voter_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    week_start DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (candidate_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_weekly_vote (voter_id, week_start)
+);
+

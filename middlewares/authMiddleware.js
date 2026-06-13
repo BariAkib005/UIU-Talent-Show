@@ -27,4 +27,27 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+const optionalVerifyToken = (req, res, next) => {
+  let token = null;
+  if (req.headers.authorization) {
+    const parts = req.headers.authorization.split(' ');
+    if (parts[0] === 'Bearer') {
+      token = parts[1];
+    }
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
+module.exports = { verifyToken, optionalVerifyToken };
+
