@@ -378,13 +378,13 @@ function bindGlobalNavigation(user) {
     const text = link.textContent.trim().toLowerCase();
     let href = '#';
     
-    if (text === 'home' || text === 'discover') href = 'home.html';
-    else if (text === 'trending') href = 'trending.html';
-    else if (text === 'categories') href = 'categories.html';
-    else if (text === 'my profile' || text === 'profile') href = 'profile.html';
-    else if (text === 'settings') href = 'settings.html';
-    else if (text === 'competitions') href = 'competitions.html';
-    else if (text === 'leaderboard') href = 'leaderboard.html';
+    if (text.includes('home') || text.includes('discover')) href = 'home.html';
+    else if (text.includes('trending')) href = 'trending.html';
+    else if (text.includes('categories') || text.includes('analytics')) href = 'categories.html';
+    else if (text.includes('profile')) href = 'profile.html';
+    else if (text.includes('settings')) href = 'settings.html';
+    else if (text.includes('competitions')) href = 'competitions.html';
+    else if (text.includes('leaderboard') || text.includes('winners')) href = 'leaderboard.html';
 
     link.href = href;
 
