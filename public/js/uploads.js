@@ -58,12 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     publishBtn.addEventListener('click', async () => {
       const title = document.getElementById('upload-title').value.trim();
       const tags = document.getElementById('upload-tags')?.value.trim() || '';
-      
-      // Category is selected, but we will combine tags and desc
       const category = document.getElementById('upload-category')?.value || '';
       
       if (!title) {
-        alert('Please enter a title.');
+        showToast('Please enter a title.', 'error');
         return;
       }
 
@@ -81,14 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let response;
         if (type === 'video' || type === 'audio') {
           if (!selectedFile) {
-            alert(`Please select a ${type} file first.`);
+            showToast(`Please select a ${type} file first.`, 'error');
             return;
           }
 
           const description = document.getElementById('upload-description').value.trim();
           const formData = new FormData();
           formData.append('title', title);
-          formData.append('description', `${tags} | ${category} | ${description}`);
+          formData.append('description', description);
+          formData.append('category', category);
+          formData.append('tags', tags);
           formData.append('type', type);
           formData.append('media', selectedFile);
 
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Blog upload
           const content = document.getElementById('upload-content').value.trim();
           if (!content) {
-            alert('Please write some content for your blog.');
+            showToast('Please write some content for your blog.', 'error');
             return;
           }
 
@@ -121,7 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
               title,
-              description: `${tags} | ${category}`,
+              description: '',
+              category,
+              tags,
               type: 'blog',
               blog_content: content
             })
@@ -131,16 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         
         if (data.success) {
-          alert('Performance published successfully!');
-          window.location.href = 'home.html';
+          showToast('Performance published successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1500);
         } else {
-          alert(data.message || 'Publishing failed.');
+          showToast(data.message || 'Publishing failed.', 'error');
           publishBtn.disabled = false;
           publishBtn.textContent = 'Publish to Arena';
         }
       } catch (err) {
         console.error(err);
-        alert('Server error. Failed to publish performance.');
+        showToast('Server error. Failed to publish performance.', 'error');
         publishBtn.disabled = false;
         publishBtn.textContent = 'Publish to Arena';
       }

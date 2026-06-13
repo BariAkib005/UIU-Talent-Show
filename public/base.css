@@ -1,0 +1,216 @@
+/* ================================================
+   UIU Talent Show — Global Design System
+   Clean Teal Light Theme v2.0
+   ================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap");
+
+/* ── Custom Properties (global theme tokens) ── */
+:root {
+  --bg:            #edf6f5;
+  --card:          #ffffff;
+  --text:          #0d2527;
+  --muted:         #6b8e92;
+  --teal-800:      #0b5153;
+  --teal-600:      #0f8a7e;
+  --teal-400:      #35c4b3;
+  --mint:          rgba(53, 196, 179, 0.12);
+  --mint-solid:    #e2f7f4;
+  --border-color:  #cde9e6;
+  --shadow-xs:     0 1px 4px rgba(11, 81, 83, 0.06);
+  --shadow-sm:     0 2px 10px rgba(11, 81, 83, 0.08);
+  --shadow-md:     0 4px 20px rgba(11, 81, 83, 0.11);
+  --shadow-lg:     0 8px 40px rgba(11, 81, 83, 0.16);
+  --gradient:      linear-gradient(135deg, #0b5153 0%, #35c4b3 100%);
+  --gradient-soft: linear-gradient(135deg, #0f7e80 0%, #45d4c2 100%);
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Body ── */
+body {
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Panels ── */
+.sidebar,
+.rightbar {
+  background: var(--card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ── Brand ── */
+.brand-text h1 {
+  color: var(--text) !important;
+}
+.brand-text p {
+  color: var(--muted) !important;
+}
+
+/* ── Navigation ── */
+.nav a,
+.topbar .links a {
+  color: var(--muted) !important;
+  text-decoration: none;
+}
+.nav a.active,
+.nav a:hover,
+.topbar .links a.active,
+.topbar .links a:hover {
+  color: var(--teal-800) !important;
+  background: var(--mint-solid) !important;
+}
+
+/* ── Topbar ── */
+.topbar {
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text) !important;
+}
+
+/* ── Form Inputs ── */
+input,
+select,
+textarea {
+  background: #f3faf9 !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted) !important;
+  opacity: 0.8;
+}
+
+/* ── Ghost Buttons ── */
+.ghost {
+  background: var(--card) !important;
+  color: var(--teal-800) !important;
+  border: 1.5px solid var(--border-color) !important;
+  cursor: pointer;
+  transition: all 0.18s ease !important;
+}
+.ghost:hover {
+  background: var(--mint-solid) !important;
+  border-color: var(--teal-400) !important;
+}
+
+/* ── Primary / CTA Buttons ── */
+.primary,
+.cta {
+  background: var(--gradient) !important;
+  color: #ffffff !important;
+  border: none !important;
+  cursor: pointer;
+}
+.primary:hover,
+.cta:hover {
+  opacity: 0.9 !important;
+}
+
+/* ── Tab Pills ── */
+.pill,
+.tabs button,
+.cta-card {
+  background: var(--card) !important;
+  color: var(--muted) !important;
+  border: 1.5px solid var(--border-color) !important;
+  box-shadow: var(--shadow-xs) !important;
+  cursor: pointer;
+}
+
+/* ── Active State ── */
+.active {
+  background: var(--mint-solid) !important;
+  color: var(--teal-800) !important;
+  border-color: var(--teal-400) !important;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.post,
+.leaderboard,
+.poll,
+.form-card {
+  background: var(--card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  color: var(--text) !important;
+}
+
+/* ── Rank Badges ── */
+.rank {
+  background: var(--mint) !important;
+  color: var(--teal-800) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Score / Points ── */
+.score {
+  color: var(--teal-800) !important;
+}
+
+/* ── Rows & Lists ── */
+.row,
+.leader,
+.table-row,
+.leader-row,
+.mini-card {
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text) !important;
+}
+
+/* ── Hero sections (general utility panels) ── */
+/* Note: .hero on signin/signup pages has its own teal gradient — do NOT override */
+.hero:not(.auth-hero) {
+  background: var(--card);
+}
+
+/* ── Avatar base ── */
+.avatar {
+  background: var(--gradient) !important;
+  color: #ffffff !important;
+}
+
+/* ── Podium cards ── */
+.podium {
+  background: var(--card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  color: var(--text) !important;
+}
+.podium h3 {
+  color: var(--text) !important;
+}
+.podium.winner {
+  border: 2px solid var(--teal-400) !important;
+  box-shadow: 0 0 0 4px var(--mint), var(--shadow-md) !important;
+}
+
+/* ── Tags ── */
+.tag {
+  background: var(--mint-solid) !important;
+  color: var(--teal-800) !important;
+  border: 1px solid var(--teal-400) !important;
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: var(--bg); }
+::-webkit-scrollbar-thumb  { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--teal-400); }

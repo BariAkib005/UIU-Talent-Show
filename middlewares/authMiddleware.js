@@ -2,10 +2,12 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
-  // Check token in cookies or Authorization header
-  let token = req.cookies.token;
-  
-  if (!token && req.headers.authorization) {
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ success: false, message: 'Server configuration error.' });
+  }
+
+  let token = null;
+  if (req.headers.authorization) {
     const parts = req.headers.authorization.split(' ');
     if (parts[0] === 'Bearer') {
       token = parts[1];
@@ -17,7 +19,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'uiu_talent_show_super_secret_jwt_key_2026');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Contains id, email, name, student_id
     next();
   } catch (error) {

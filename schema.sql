@@ -22,19 +22,32 @@ CREATE TABLE IF NOT EXISTS submissions (
     title VARCHAR(255) NOT NULL,
     description TEXT NULL,
     type ENUM('video', 'audio', 'blog') NOT NULL,
+    category VARCHAR(100) NULL,
+    tags VARCHAR(255) NULL,
     file_path VARCHAR(255) NULL,           -- Path to video/audio file or blog text file
     blog_content TEXT NULL,                -- For text blogs
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 3. Votes Table
-CREATE TABLE IF NOT EXISTS votes (
+-- 3. Likes Table
+CREATE TABLE IF NOT EXISTS likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     submission_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_user_vote (user_id, submission_id) -- Prevent double voting
+    UNIQUE KEY unique_user_like (user_id, submission_id) -- Prevent double liking
+);
+
+-- 4. Comments Table
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    submission_id INT NOT NULL,
+    comment_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
 );

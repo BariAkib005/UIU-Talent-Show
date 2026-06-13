@@ -3,36 +3,680 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UIU Talent Show - Pages</title>
+  <title>UIU Talent Show - Portal</title>
+  <link rel="stylesheet" href="base.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 24px;
+      font-family: 'Manrope', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg);
+      color: var(--text);
     }
-    h1 { margin-bottom: 16px; }
-    ul { line-height: 1.8; }
+    .portal-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+    
+    /* Brand Header */
+    .portal-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      align-items: end;
+    }
+    .brand-mark span {
+      background: linear-gradient(180deg, #9ff3e9, #35c4b3);
+      border-radius: 6px 6px 2px 2px;
+      display: block;
+      width: 100%;
+    }
+    .brand-mark span:nth-child(1) { height: 12px; opacity: 0.5; }
+    .brand-mark span:nth-child(2) { height: 22px; opacity: 0.8; }
+    .brand-mark span:nth-child(3) { height: 16px; }
+    
+    .brand-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #0b5153 30%, #35c4b3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 8px 0 0 0;
+      line-height: 1.5;
+    }
+
+    /* Controls: Search & Filters */
+    .controls-wrapper {
+      background: #ffffff;
+      backdrop-filter: none;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 4px 20px rgba(11, 81, 83, 0.08);
+    }
+    .search-box {
+      position: relative;
+      width: 100%;
+    }
+    .search-box input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 16px 20px 16px 52px;
+      border-radius: 12px;
+      background: var(--bg) !important;
+      border: 1.5px solid var(--border-color) !important;
+      color: var(--text);
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--teal-800) !important;
+      box-shadow: 0 0 0 3px rgba(255, 74, 90, 0.2);
+    }
+    .search-box svg {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+    }
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1.5px solid var(--border-color);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover {
+      color: var(--teal-800);
+      background: var(--mint-solid);
+      border-color: var(--teal-400);
+    }
+    .filter-btn.active {
+      background: var(--mint) !important;
+      color: var(--teal-800) !important;
+      border-color: var(--teal-800);
+    }
+
+    /* Grid layout */
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    /* Page Cards */
+    .page-card {
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .page-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--teal-800), var(--teal-400));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .page-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--teal-400);
+      box-shadow: 0 12px 30px rgba(11, 81, 83, 0.12), 0 0 0 3px var(--mint);
+    }
+    .page-card:hover::before {
+      opacity: 1;
+    }
+    
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--mint-solid);
+      display: grid;
+      place-items: center;
+      color: var(--teal-800);
+      transition: all 0.3s ease;
+    }
+    .page-card:hover .card-icon {
+      background: var(--mint);
+      transform: scale(1.05);
+    }
+    .card-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.5px;
+    }
+    .badge-interactive {
+      background: rgba(66, 194, 177, 0.12);
+      color: #42c2b1;
+    }
+    .badge-form {
+      background: rgba(255, 168, 74, 0.12);
+      color: #ffa84a;
+    }
+    .badge-active {
+      background: var(--mint);
+      color: var(--teal-800);
+    }
+    .badge-static {
+      background: rgba(142, 142, 159, 0.12);
+      color: var(--muted);
+    }
+    .badge-mock {
+      background: rgba(142, 142, 159, 0.12);
+      color: var(--muted);
+      border: 1px dashed var(--border-color);
+    }
+    
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+    
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--teal-800);
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateX(-5px);
+    }
+    .page-card:hover .card-footer {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Footer */
+    .portal-footer {
+      border-top: 1px solid var(--border-color);
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 60px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 24px;
+      background: var(--card);
+      border: 1px dashed var(--border-color);
+      border-radius: 16px;
+    }
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: var(--text);
+    }
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
-  <h1>UIU Talent Show Pages</h1>
-  <ul>
-    <li><a href="signup.html">Sign Up</a></li>
-    <li><a href="signin.html">Sign In</a></li>
-    <li><a href="otp.html">OTP Verification</a></li>
-    <li><a href="success.html">Welcome</a></li>
-    <li><a href="home.html">Homepage</a></li>
-    <li><a href="trending.html">Trending</a></li>
-    <li><a href="categories.html">Categories</a></li>
-    <li><a href="profile.html">User Profile</a></li>
-    <li><a href="settings.html">Settings</a></li>
-    <li><a href="notifications.html">Notifications</a></li>
-    <li><a href="leaderboard.html">Leaderboard</a></li>
-    <li><a href="competitions.html">Competitions</a></li>
-    <li><a href="audio-talent.html">Audio Talent</a></li>
-    <li><a href="choose-talent.html">Choose Talent</a></li>
-    <li><a href="upload-video.html">Upload Video</a></li>
-    <li><a href="upload-audio.html">Upload Audio</a></li>
-    <li><a href="upload-blog.html">Upload Blog</a></li>
-  </ul>
+  <div class="portal-container">
+    <!-- Brand Header -->
+    <header class="portal-header">
+      <div class="brand-logo">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <h1 class="brand-title">UIU Talent Show</h1>
+      </div>
+      <p class="brand-subtitle">The Arena</p>
+    </header>
+
+    <!-- Controls Wrapper -->
+    <div class="controls-wrapper">
+      <!-- Search Input -->
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search pages by name or description..." />
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-btn active" data-filter="all">All Pages</button>
+        <button class="filter-btn" data-filter="auth">Authentication</button>
+        <button class="filter-btn" data-filter="main">Main Platform</button>
+        <button class="filter-btn" data-filter="uploads">Submissions</button>
+      </div>
+    </div>
+
+    <!-- Pages Grid -->
+    <main class="pages-grid" id="pages-grid">
+      
+      <!-- 1. Sign In -->
+      <a href="signin.html" class="page-card" data-category="auth">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" x2="3" y1="12" y2="12"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Sign In</h3>
+          <p class="card-desc">Log in using student email and credentials to receive JWT access tokens.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 2. Sign Up -->
+      <a href="signup.html" class="page-card" data-category="auth">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="19" x2="19" y1="8" y2="14"></line>
+              <line x1="22" x2="16" y1="11" y2="11"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Sign Up</h3>
+          <p class="card-desc">Register a new student account to participate in the talent show voting.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+
+      <!-- 4. Success / Welcome -->
+      <a href="success.html" class="page-card" data-category="auth">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Welcome Page</h3>
+          <p class="card-desc">Registration success onboarding state prior to redirection to feed.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 5. Homepage -->
+      <a href="home.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Homepage</h3>
+          <p class="card-desc">The central dashboard of the Arena displaying dynamic posts and top contestants.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 6. Trending -->
+      <a href="trending.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+              <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Trending Feed</h3>
+          <p class="card-desc">Browse top-voted performance submittals sorted dynamically in descend order.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 7. Categories -->
+      <a href="categories.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+              <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+              <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+              <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Categories</h3>
+          <p class="card-desc">Explore submissions partitioned by category tags (Music, Art, Dance, Writing).</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 8. Leaderboard -->
+      <a href="leaderboard.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="7"></circle>
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Leaderboard</h3>
+          <p class="card-desc">Live scorecard showing current student standings based on verified votes.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 9. User Profile -->
+      <a href="profile.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">User Profile</h3>
+          <p class="card-desc">Manage your talent showcase submissions, details, and accumulated vote tallies.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+
+      <!-- 13. Audio Talent -->
+      <a href="audio-talent.html" class="page-card" data-category="main">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Audio Talent</h3>
+          <p class="card-desc">Aggregated audio stream feed featuring singers, instrumentalists, and spoken word.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 14. Choose Talent -->
+      <a href="choose-talent.html" class="page-card" data-category="uploads">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Choose Talent</h3>
+          <p class="card-desc">Entry junction to route the contestant to the video, audio, or blog upload wizard.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 15. Upload Video -->
+      <a href="upload-video.html" class="page-card" data-category="uploads">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m22 8-6 4 6 4V8Z"></path>
+              <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Upload Video</h3>
+          <p class="card-desc">Publish a video performance entry (supports MP4, MKV up to 100MB).</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 16. Upload Audio -->
+      <a href="upload-audio.html" class="page-card" data-category="uploads">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" x2="12" y1="19" y2="22"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Upload Audio</h3>
+          <p class="card-desc">Submit MP3, WAV, or AAC audio files to showcase musical tracks or vocals.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- 17. Upload Blog -->
+      <a href="upload-blog.html" class="page-card" data-category="uploads">
+        <div class="card-top">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+              <path d="M10 9H8"></path>
+              <path d="M16 13H8"></path>
+              <path d="M16 17H8"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Upload Blog</h3>
+          <p class="card-desc">Draft written entries, poetry, or articles to publish onto the Arena board.</p>
+        </div>
+        <div class="card-footer">
+          Open Page &rarr;
+        </div>
+      </a>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3>No pages match your search</h3>
+        <p>Try refining your search query or choosing another category filter.</p>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+      UIU Talent Show Developer Environment Map &copy; 2026. All templates local to /public.
+    </footer>
+  </div>
+
+  <!-- JavaScript logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('search-input');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const pageCards = document.querySelectorAll('.page-card');
+      const emptyState = document.getElementById('empty-state');
+
+      let activeFilter = 'all';
+      let searchQuery = '';
+
+      function filterPages() {
+        let visibleCount = 0;
+
+        pageCards.forEach(card => {
+          const title = card.querySelector('.card-title').textContent.toLowerCase();
+          const desc = card.querySelector('.card-desc').textContent.toLowerCase();
+          const category = card.dataset.category;
+
+          const matchesSearch = title.includes(searchQuery) || desc.includes(searchQuery);
+          const matchesFilter = activeFilter === 'all' || category === activeFilter;
+
+          if (matchesSearch && matchesFilter) {
+            card.style.display = 'flex';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (visibleCount === 0) {
+          emptyState.style.display = 'block';
+        } else {
+          emptyState.style.display = 'none';
+        }
+      }
+
+      // Search event listener
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        filterPages();
+      });
+
+      // Filter tabs event listeners
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeFilter = btn.dataset.filter;
+          filterPages();
+        });
+      });
+    });
+  </script>
 </body>
 </html>

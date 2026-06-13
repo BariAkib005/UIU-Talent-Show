@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="base.css" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UIU Talent Show - Leaderboard</title>
@@ -37,46 +38,17 @@
         </div>
       </section>
 
-      <section class="top-three">
-        <article class="podium">
-          <span class="rank">2</span>
-          <div class="avatar">MS</div>
-          <h3>Maya Sterling</h3>
-          <p>18.4k votes</p>
-        </article>
-        <article class="podium winner">
-          <span class="rank">1</span>
-          <div class="avatar">IP</div>
-          <h3>Israt Jerin Porshi</h3>
-          <p>24.2k votes</p>
-        </article>
-        <article class="podium">
-          <span class="rank">3</span>
-          <div class="avatar">SK</div>
-          <h3>Sarah Jenkins</h3>
-          <p>15.9k votes</p>
-        </article>
+      <section class="top-three" id="leaderboard-podium">
+        <!-- Rendered dynamically -->
       </section>
 
       <section class="grid">
         <div class="rankings">
           <h3>Global Rankings</h3>
-          <div class="row">
-            <span class="place">4</span>
-            <span>Marcus Thorne</span>
-            <span class="score">12.2k</span>
+          <div id="leaderboard-list">
+            <!-- Rendered dynamically -->
           </div>
-          <div class="row">
-            <span class="place">5</span>
-            <span>Lina Ray</span>
-            <span class="score">11.8k</span>
-          </div>
-          <div class="row">
-            <span class="place">6</span>
-            <span>Sophie M.</span>
-            <span class="score">10.5k</span>
-          </div>
-          <button class="ghost">Load more rankings</button>
+          <button class="ghost" id="load-more-btn" style="display:none;">Load more rankings</button>
         </div>
 
         <aside class="side">
@@ -87,10 +59,11 @@
           </div>
           <div class="formula">
             <h4>Arena Point Formula</h4>
-            <div class="formula-row"><span>Performance Votes</span><strong>1.2x</strong></div>
-            <div class="formula-row"><span>Community Votes</span><strong>5.0x</strong></div>
-            <div class="formula-row"><span>Faculty Spotlight</span><strong>2.5x</strong></div>
-            <div class="formula-row"><span>Viral Bonus</span><strong>1.0x</strong></div>
+            <div class="formula-row"><span>Performance Likes</span><strong>1.0 pt</strong></div>
+            <div class="formula-row"><span>Community Comments</span><strong>2.0 pts</strong></div>
+            <div class="formula-row" style="font-size: 0.7rem; border-top: 1px solid #eef4f4; padding-top: 8px; margin-top: 4px; color: var(--muted);">
+              <span>Self-comments are excluded from points calculation.</span>
+            </div>
           </div>
           <div class="hall">
             <h4>Hall of Fame</h4>

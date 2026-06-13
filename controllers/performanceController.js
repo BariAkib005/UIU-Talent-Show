@@ -1,9 +1,10 @@
+const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const fs = require('fs');
 const path = require('path');
 
 const uploadPerformance = async (req, res) => {
-  const { title, description, type, blog_content } = req.body;
+  const { title, description, type, blog_content, category, tags } = req.body;
   const user_id = req.user.id;
 
   if (!title || !type) {
@@ -27,8 +28,8 @@ const uploadPerformance = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      'INSERT INTO submissions (user_id, title, description, type, file_path, blog_content) VALUES (?, ?, ?, ?, ?, ?)',
-      [user_id, title, description || null, type, file_path, blog_content || null]
+      'INSERT INTO submissions (user_id, title, description, type, category, tags, file_path, blog_content) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [user_id, title, description || null, type, category || null, tags || null, file_path, blog_content || null]
     );
 
     return res.status(201).json({
@@ -49,13 +50,26 @@ const uploadPerformance = async (req, res) => {
 };
 
 const getPerformances = async (req, res) => {
-  const { type, search } = req.query;
+  const { type, search, limit, offset } = req.query;
+  const pageSize = parseInt(limit) || 10;
+  const pageOffset = parseInt(offset) || 0;
   
   let query = `
-    SELECT s.*, u.name AS performer_name, u.department, u.batch, COUNT(v.id) AS vote_count
+    SELECT s.id, s.user_id, s.title, s.description, s.type, s.file_path, s.created_at,
+           LEFT(s.blog_content, 200) AS blog_excerpt,
+           u.NAME AS performer_name, u.department, u.batch,
+           COALESCE(like_counts.cnt, 0) AS like_count,
+           COALESCE(comment_counts.cnt, 0) AS comment_count,
+           (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS points,
+           (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS vote_count
     FROM submissions s
     JOIN users u ON s.user_id = u.id
-    LEFT JOIN votes v ON s.id = v.submission_id
+    LEFT JOIN (
+      SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
+    ) like_counts ON s.id = like_counts.submission_id
+    LEFT JOIN (
+      SELECT submission_id, COUNT(*) as cnt FROM comments GROUP BY submission_id
+    ) comment_counts ON s.id = comment_counts.submission_id
   `;
   
   const queryParams = [];
@@ -76,7 +90,8 @@ const getPerformances = async (req, res) => {
     query += ' WHERE ' + whereClauses.join(' AND ');
   }
 
-  query += ' GROUP BY s.id ORDER BY s.created_at DESC';
+  query += ' GROUP BY s.id ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
+  queryParams.push(pageSize, pageOffset);
 
   try {
     const [performances] = await db.query(query, queryParams);
@@ -89,14 +104,24 @@ const getPerformances = async (req, res) => {
 
 const getTrendingPerformances = async (req, res) => {
   try {
-    // Trending are sorted by vote count, then by date
     const [performances] = await db.query(`
-      SELECT s.*, u.name AS performer_name, u.department, u.batch, COUNT(v.id) AS vote_count
+      SELECT s.id, s.user_id, s.title, s.description, s.type, s.file_path, s.created_at,
+             LEFT(s.blog_content, 200) AS blog_excerpt,
+             u.NAME AS performer_name, u.department, u.batch,
+             COALESCE(like_counts.cnt, 0) AS like_count,
+             COALESCE(comment_counts.cnt, 0) AS comment_count,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS points,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS vote_count
       FROM submissions s
       JOIN users u ON s.user_id = u.id
-      LEFT JOIN votes v ON s.id = v.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
+      ) like_counts ON s.id = like_counts.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM comments GROUP BY submission_id
+      ) comment_counts ON s.id = comment_counts.submission_id
       GROUP BY s.id
-      ORDER BY vote_count DESC, s.created_at DESC
+      ORDER BY points DESC, s.created_at DESC
       LIMIT 10
     `);
     return res.status(200).json({ success: true, performances });
@@ -111,10 +136,19 @@ const getPerformanceById = async (req, res) => {
 
   try {
     const [submissions] = await db.query(`
-      SELECT s.*, u.name AS performer_name, u.email AS performer_email, u.department, u.batch, COUNT(v.id) AS vote_count
+      SELECT s.*, u.NAME AS performer_name, u.email AS performer_email, u.department, u.batch,
+             COALESCE(like_counts.cnt, 0) AS like_count,
+             COALESCE(comment_counts.cnt, 0) AS comment_count,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS points,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS vote_count
       FROM submissions s
       JOIN users u ON s.user_id = u.id
-      LEFT JOIN votes v ON s.id = v.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
+      ) like_counts ON s.id = like_counts.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM comments GROUP BY submission_id
+      ) comment_counts ON s.id = comment_counts.submission_id
       WHERE s.id = ?
       GROUP BY s.id
     `, [id]);
@@ -123,14 +157,28 @@ const getPerformanceById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Performance not found.' });
     }
 
-    // Get list of voters to see if current user voted
-    const [voters] = await db.query('SELECT user_id FROM votes WHERE submission_id = ?', [id]);
-    const voterIds = voters.map(v => v.user_id);
+    // Check if the current requesting user has liked using an EXISTS query
+    let hasVoted = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const [voteCheck] = await db.query(
+          'SELECT EXISTS(SELECT 1 FROM likes WHERE user_id = ? AND submission_id = ?) as has_voted',
+          [decoded.id, id]
+        );
+        hasVoted = !!voteCheck[0].has_voted;
+      } catch (err) {
+        // Ignore token decode errors
+      }
+    }
 
     return res.status(200).json({
       success: true,
       performance: submissions[0],
-      voterIds
+      hasVoted
     });
   } catch (error) {
     console.error('Fetch performance detail error:', error);
@@ -143,10 +191,19 @@ const getUserPerformances = async (req, res) => {
 
   try {
     const [performances] = await db.query(`
-      SELECT s.*, u.name AS performer_name, u.department, u.batch, COUNT(v.id) AS vote_count
+      SELECT s.*, u.NAME AS performer_name, u.department, u.batch,
+             COALESCE(like_counts.cnt, 0) AS like_count,
+             COALESCE(comment_counts.cnt, 0) AS comment_count,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS points,
+             (COALESCE(like_counts.cnt, 0) * 1 + COALESCE(comment_counts.cnt, 0) * 2) AS vote_count
       FROM submissions s
       JOIN users u ON s.user_id = u.id
-      LEFT JOIN votes v ON s.id = v.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM likes GROUP BY submission_id
+      ) like_counts ON s.id = like_counts.submission_id
+      LEFT JOIN (
+        SELECT submission_id, COUNT(*) as cnt FROM comments GROUP BY submission_id
+      ) comment_counts ON s.id = comment_counts.submission_id
       WHERE s.user_id = ?
       GROUP BY s.id
       ORDER BY s.created_at DESC
