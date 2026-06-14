@@ -54,36 +54,6 @@ const signup = async (req, res) => {
   }
 };
 
-const verifyOtp = async (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
-  }
-
-  try {
-    const [users] = await db.query('SELECT id, otp FROM users WHERE email = ?', [email]);
-
-    if (users.length === 0) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
-    }
-
-    const user = users[0];
-
-    if (user.otp !== otp) {
-      return res.status(400).json({ success: false, message: 'Invalid OTP code.' });
-    }
-
-    // Mark user as verified, clear OTP
-    await db.query('UPDATE users SET is_verified = true, otp = NULL WHERE id = ?', [user.id]);
-
-    return res.status(200).json({ success: true, message: 'Email verified successfully! You can now sign in.' });
-  } catch (error) {
-    console.error('OTP Verification error:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error.' });
-  }
-};
-
 const signin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -93,7 +63,7 @@ const signin = async (req, res) => {
 
   try {
     const [users] = await db.query(
-      'SELECT id, NAME as name, email, student_id, department, batch, PASSWORD as password, is_verified, otp, created_at FROM users WHERE email = ?',
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, PASSWORD as password, is_verified, otp, created_at FROM users WHERE email = ?',
       [email]
     );
 
@@ -109,18 +79,14 @@ const signin = async (req, res) => {
     }
 
     // Generate JWT
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured on the server.');
+    }
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, student_id: user.student_id },
-      process.env.JWT_SECRET || 'uiu_talent_show_super_secret_jwt_key_2026',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-
-    // Set HTTP-only Cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: false, // Set to true if running HTTPS
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
 
     return res.status(200).json({
       success: true,
@@ -132,7 +98,9 @@ const signin = async (req, res) => {
         email: user.email,
         student_id: user.student_id,
         department: user.department,
-        batch: user.batch
+        batch: user.batch,
+        bio: user.bio,
+        profile_pic: user.profile_pic
       }
     });
   } catch (error) {
@@ -144,7 +112,7 @@ const signin = async (req, res) => {
 const me = async (req, res) => {
   try {
     const [users] = await db.query(
-      'SELECT id, NAME as name, email, student_id, department, batch, created_at FROM users WHERE id = ?',
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, created_at FROM users WHERE id = ?',
       [req.user.id]
     );
 
@@ -160,8 +128,51 @@ const me = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie('token');
   return res.status(200).json({ success: true, message: 'Logged out successfully.' });
 };
 
-module.exports = { signup, verifyOtp, signin, me, logout };
+const updateProfile = async (req, res) => {
+  const { name, bio, department, batch } = req.body;
+  const userId = req.user.id;
+
+  if (!name || !department || !batch) {
+    return res.status(400).json({ success: false, message: 'Name, department, and batch are required.' });
+  }
+
+  try {
+    let profilePicPath = null;
+    if (req.file) {
+      profilePicPath = `/uploads/${req.file.filename}`;
+    }
+
+    let query = 'UPDATE users SET name = ?, bio = ?, department = ?, batch = ?';
+    let params = [name, bio || null, department, batch];
+
+    if (profilePicPath) {
+      query += ', profile_pic = ?';
+      params.push(profilePicPath);
+    }
+
+    query += ' WHERE id = ?';
+    params.push(userId);
+
+    await db.query(query, params);
+
+    // Fetch the updated user
+    const [users] = await db.query(
+      'SELECT id, NAME as name, email, student_id, department, batch, bio, profile_pic, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      user: users[0]
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+module.exports = { signup, signin, me, logout, updateProfile };

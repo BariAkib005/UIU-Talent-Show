@@ -30,12 +30,13 @@ body {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #ffffff, #f0fbfb);
+  background: #ffffff;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  border-right: 1px solid #e3efef;
+  border-right: 1px solid #d8eeec;
+  box-shadow: 4px 0 20px rgba(11, 81, 83, 0.04);
 }
 
 .brand {
@@ -157,7 +158,13 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #d8ecec;
+  background: linear-gradient(135deg, #0b5153, #35c4b3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
 }
 
 .upload-card {
@@ -240,7 +247,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  border-left: 1px solid #e3efef;
+  border-left: 1px solid var(--border-color, #cde9e6);
   background: #f9fdfd;
 }
 

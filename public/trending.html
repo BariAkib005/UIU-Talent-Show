@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="base.css" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UIU Talent Show - Trending</title>
@@ -39,24 +40,8 @@
         </div>
       </header>
 
-      <section class="feature">
-        <div class="feature-media">Featured Story Image</div>
-        <div class="feature-copy">
-          <span class="tag">Spotlight Story</span>
-          <h3>The Physics of Sound: How University Musicians Are Redefining Contemporary Jazz</h3>
-          <p>
-            Discover how the talent generation of UIU is merging classical
-            training with improvised electronic soundscapes.
-          </p>
-          <div class="author">
-            <span class="avatar"></span>
-            <div>
-              <strong>Elara Basique</strong>
-              <p>Music Faculty</p>
-            </div>
-          </div>
-          <button class="ghost">Read Full Story</button>
-        </div>
+      <section class="feature" id="trending-spotlight">
+        <!-- Rendered dynamically -->
       </section>
 
       <section class="report">
@@ -85,10 +70,9 @@
 
     <aside class="rightbar">
       <h3>Trending Now</h3>
-      <div class="mini-card">Beyond the Bars</div>
-      <div class="mini-card">Digital Murals: The Future of Campus Architecture</div>
-      <div class="mini-card">Mastering the Mic: The Top 5 UIU Singers</div>
-      <div class="mini-card">Why the Arena Changed my Creative Workflow</div>
+      <div id="trending-sidebar-items">
+        <!-- Rendered dynamically -->
+      </div>
     </aside>
   </div>
   <script src="js/auth.js"></script>
