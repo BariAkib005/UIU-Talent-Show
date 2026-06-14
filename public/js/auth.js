@@ -1,3 +1,49 @@
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container') || (() => {
+    const c = document.createElement('div');
+    c.id = 'toast-container';
+    c.style.position = 'fixed';
+    c.style.bottom = '24px';
+    c.style.right = '24px';
+    c.style.display = 'flex';
+    c.style.flexDirection = 'column';
+    c.style.gap = '8px';
+    c.style.zIndex = '99999';
+    document.body.appendChild(c);
+    return c;
+  })();
+
+  const toast = document.createElement('div');
+  toast.style.background = type === 'error' ? '#ff4a5a' : '#0b5153';
+  toast.style.color = '#fff';
+  toast.style.padding = '12px 20px';
+  toast.style.borderRadius = '8px';
+  toast.style.border = type === 'error' ? 'none' : '1px solid #35c4b3';
+  toast.style.fontSize = '0.9rem';
+  toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+  toast.style.opacity = '0';
+  toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  toast.style.transform = 'translateY(20px)';
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  }, 10);
+
+  // Remove toast
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // --- SIGN UP PAGE LOGIC ---
   const signupForm = document.querySelector('.signup-form');
@@ -57,21 +103,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const agree = document.getElementById('signup-agree').checked;
 
       if (!agree) {
-        alert('You must agree to the Terms of Use.');
+        showToast('You must agree to the Terms of Use.', 'error');
         return;
       }
 
       // Validate Student ID format
       const studentIdRegex = /^\d{3}\s?\d{3}\s?\d{3}$/;
       if (!studentIdRegex.test(student_id)) {
-        alert('Invalid Student ID format. Please use a format like 011 201 000.');
+        showToast('Invalid Student ID format. Please use a format like 011 201 000.', 'error');
         return;
       }
 
       // Validate email domain
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]*uiu\.ac\.bd$/i;
       if (!emailRegex.test(email)) {
-        alert('Only UIU student emails are allowed (e.g., name@bscse.uiu.ac.bd).');
+        showToast('Only UIU student emails are allowed (e.g., name@bscse.uiu.ac.bd).', 'error');
         return;
       }
 
@@ -87,82 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (data.success) {
-          alert('Account created successfully!');
-          window.location.href = 'success.html';
+          showToast('Account created successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = 'success.html';
+          }, 1500);
         } else {
-          alert(data.message || 'Signup failed.');
+          showToast(data.message || 'Signup failed.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('Server connection error. Please try again.');
+        showToast('Server connection error. Please try again.', 'error');
       }
     });
-  }
-
-  // --- OTP VERIFICATION PAGE LOGIC ---
-  const otpPage = document.querySelector('.otp-page');
-  if (otpPage) {
-    const emailDisplay = document.getElementById('otp-email-display');
-    const savedEmail = sessionStorage.getItem('otp_email');
-    
-    if (savedEmail) {
-      emailDisplay.textContent = savedEmail;
-    }
-
-    const inputs = document.querySelectorAll('.otp-inputs input');
-    
-    // Auto-focus transition for OTP inputs
-    inputs.forEach((input, index) => {
-      input.addEventListener('input', (e) => {
-        if (e.target.value.length === 1 && index < inputs.length - 1) {
-          inputs[index + 1].focus();
-        }
-      });
-
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
-          inputs[index - 1].focus();
-        }
-      });
-    });
-
-    const verifyBtn = document.getElementById('verify-btn');
-    if (verifyBtn) {
-      verifyBtn.addEventListener('click', async () => {
-        let otp = '';
-        inputs.forEach(input => {
-          otp += input.value.trim();
-        });
-
-        if (otp.length < 6) {
-          alert('Please enter the full 6-digit code.');
-          return;
-        }
-
-        const email = savedEmail || '';
-        try {
-          const response = await fetch('/api/auth/verify-otp', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, otp })
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            sessionStorage.removeItem('otp_email');
-            window.location.href = 'success.html';
-          } else {
-            alert(data.message || 'Verification failed.');
-          }
-        } catch (err) {
-          console.error(err);
-          alert('Error connecting to verification server.');
-        }
-      });
-    }
   }
 
   // --- SIGN IN PAGE LOGIC ---
@@ -202,13 +184,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.success) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = 'home.html';
+          showToast('Logged in successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1000);
         } else {
-          alert(data.message || 'Invalid email or password.');
+          showToast(data.message || 'Invalid email or password.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('Server connection error. Please try again.');
+        showToast('Server connection error. Please try again.', 'error');
       }
     });
   }
@@ -230,7 +215,13 @@ function checkAuthentication() {
 // Helper function to logout
 async function logoutUser() {
   try {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    const token = localStorage.getItem('token');
+    await fetch('/api/auth/logout', { 
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   } catch (err) {
     console.error('Logout error:', err);
   }

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="base.css" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UIU Talent Show - Profile</title>
+  <title>UIU Talent Show - My Profile</title>
+  <meta name="description" content="View your UIU Talent Show profile, submissions, trophy shelf and performance stats." />
   <link rel="stylesheet" href="profile.css" />
 </head>
 <body>
   <div class="page">
+
+    <!-- ── Sidebar ── -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
@@ -20,29 +24,47 @@
       </div>
 
       <nav class="nav">
-        <a href="home.html">Home</a>
-        <a class="active" href="#">My Profile</a>
-        <a href="#">Submissions</a>
-        <a href="#">Analytics</a>
-        <a href="#">Settings</a>
+        <a href="home.html">🏠 Home</a>
+        <a class="active" href="#">👤 My Profile</a>
+        <a href="leaderboard.html">🏆 Leaderboard</a>
+        <a href="categories.html">📂 Analytics</a>
+        <a href="#">⚙ Settings</a>
       </nav>
 
-      <button class="cta">Upload Performance</button>
+      <button class="cta" id="sidebar-upload-btn">Upload Performance</button>
+
+      <div class="sidebar-footer">
+        <a href="#">Help</a>
+        <a href="#">Logout</a>
+      </div>
     </aside>
 
+    <!-- ── Main Content ── -->
     <main class="content">
-      <section class="profile-hero">
-        <div class="profile-info">
-          <div class="avatar">Avatar</div>
-          <div>
-            <h2>Alex Rivers</h2>
-            <p>Dept. of Multimedia and Creative Technology, Batch 2022</p>
-            <span class="tag">Singer and Producer</span>
-          </div>
-        </div>
-        <button class="ghost">Edit Profile</button>
-      </section>
 
+      <!-- Profile Banner (gradient hero) -->
+      <div class="profile-banner">
+        <!-- Decorative blobs (CSS) -->
+        <div class="banner-body">
+          <div class="profile-avatar avatar"></div>
+          <div class="profile-meta">
+            <div class="profile-name-row">
+              <h2 class="profile-name">Alex Rivers</h2>
+              <span class="verified-badge">✓ Verified</span>
+            </div>
+            <p class="profile-dept">Dept. of Multimedia and Creative Technology • Batch 2022</p>
+            <p class="profile-bio" style="margin-top: 8px; font-size: 0.9rem; color: rgba(255,255,255,0.85); max-width: 500px; line-height: 1.4;"></p>
+          </div>
+          <button class="edit-profile-btn">✏ Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- Talent label -->
+      <div class="talent-row">
+        <span class="tag">Singer and Producer</span>
+      </div>
+
+      <!-- Stats Row -->
       <section class="stats">
         <div class="stat">
           <strong>24</strong>
@@ -56,25 +78,85 @@
           <strong>348</strong>
           <span>Comments</span>
         </div>
-        <div class="stat">
+        <div class="stat awards-stat">
           <strong>03</strong>
           <span>Awards</span>
         </div>
       </section>
 
-      <section class="tabs">
-        <button class="active">My Videos</button>
+      <!-- Filter Tabs -->
+      <section class="tabs" id="profile-tabs">
+        <button class="active">All Posts</button>
+        <button>My Videos</button>
         <button>Audio</button>
         <button>Blogs</button>
         <button>Liked</button>
         <button>Saved</button>
       </section>
 
-      <section class="gallery">
-        <!-- Dynamic submissions will load here -->
+      <!-- Submissions Gallery -->
+      <section class="gallery" id="profile-gallery">
+        <!-- Dynamically populated -->
       </section>
+
     </main>
   </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-backdrop" id="edit-profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 81, 83, 0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 24px;">
+    <div style="background: var(--card); border: 1px solid var(--border-color); border-radius: 20px; padding: 32px; max-width: 500px; width: 100%; position: relative; box-shadow: var(--shadow-lg); display: grid; gap: 18px;">
+      <button class="close-modal-btn" id="close-edit-modal-btn" style="position: absolute; top: 20px; right: 20px; background: var(--mint-solid); border: none; color: var(--teal-800); font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">&times;</button>
+      
+      <div style="display: grid; gap: 4px;">
+        <h2 style="color: var(--text); font-family: 'Playfair Display', serif; font-size: 1.5rem;">Edit Profile</h2>
+        <p style="color: var(--muted); font-size: 0.85rem;">Update your UIU Talent Show profile details.</p>
+      </div>
+
+      <form id="edit-profile-form" style="display: grid; gap: 14px;">
+        <label style="display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text);">
+          Full Name
+          <input type="text" id="edit-profile-name" required style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; font-size: 0.9rem;" />
+        </label>
+        
+        <label style="display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text);">
+          Bio / Biodata
+          <textarea id="edit-profile-bio" placeholder="Tell us about your talents, interests, and background..." style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; font-size: 0.9rem; min-height: 80px; resize: vertical;"></textarea>
+        </label>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <label style="display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text);">
+            Department
+            <select id="edit-profile-dept" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="CSE">CSE</option>
+              <option value="EEE">EEE</option>
+              <option value="BBA">BBA</option>
+              <option value="ENG">ENG</option>
+            </select>
+          </label>
+          <label style="display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text);">
+            Batch / Year
+            <select id="edit-profile-batch" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="Fall 2023">Fall 2023</option>
+              <option value="Spring 2024">Spring 2024</option>
+              <option value="Summer 2024">Summer 2024</option>
+              <option value="Fall 2024">Fall 2024</option>
+            </select>
+          </label>
+        </div>
+
+        <label style="display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text);">
+          Profile Picture
+          <input type="file" id="edit-profile-pic" accept="image/*" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; font-size: 0.85rem;" />
+        </label>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" class="ghost" id="cancel-edit-btn" style="padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;">Cancel</button>
+          <button type="submit" class="primary" style="padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.9rem;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
 </body>

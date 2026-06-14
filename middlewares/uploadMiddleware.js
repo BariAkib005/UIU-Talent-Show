@@ -19,17 +19,18 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter for videos and audio
+// File filter for videos, audio, and images (blog covers)
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
     'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/x-m4a',
-    'video/mp4', 'video/mpeg', 'video/ogg', 'video/webm', 'video/quicktime'
+    'video/mp4', 'video/mpeg', 'video/ogg', 'video/webm', 'video/quicktime',
+    'image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'
   ];
   
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only audio and video files are allowed.'), false);
+    cb(new Error('Invalid file type. Only audio, video, and image files are allowed.'), false);
   }
 };
 
