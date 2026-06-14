@@ -148,6 +148,7 @@ const getLeaderboard = async (req, res) => {
         u.NAME AS creator_name, 
         u.department, 
         u.batch, 
+        u.profile_pic,
         COUNT(DISTINCT s.id) AS total_submissions, 
         COALESCE(SUM(like_counts.cnt), 0) AS total_likes,
         COALESCE(SUM(comment_counts.cnt), 0) AS total_comments,

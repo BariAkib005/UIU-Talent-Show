@@ -219,10 +219,52 @@ const getUserPerformances = async (req, res) => {
   }
 };
 
+const deletePerformance = async (req, res) => {
+  const { id } = req.params;
+  const user_id = req.user.id;
+
+  try {
+    const [submissions] = await db.query(
+      'SELECT user_id, file_path FROM submissions WHERE id = ?',
+      [id]
+    );
+
+    if (submissions.length === 0) {
+      return res.status(404).json({ success: false, message: 'Performance not found.' });
+    }
+
+    const submission = submissions[0];
+
+    if (submission.user_id !== user_id) {
+      return res.status(403).json({ success: false, message: 'You are not authorized to delete this performance.' });
+    }
+
+    if (submission.file_path) {
+      const absolutePath = path.join(__dirname, '../public', submission.file_path);
+      fs.unlink(absolutePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete file on disk at ${absolutePath}:`, err);
+        } else {
+          console.log(`Successfully deleted file: ${absolutePath}`);
+        }
+      });
+    }
+
+    await db.query('DELETE FROM submissions WHERE id = ?', [id]);
+
+    return res.status(200).json({ success: true, message: 'Performance deleted successfully!' });
+  } catch (error) {
+    console.error('Delete performance error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete performance.' });
+  }
+};
+
 module.exports = {
   uploadPerformance,
   getPerformances,
   getTrendingPerformances,
   getPerformanceById,
-  getUserPerformances
+  getUserPerformances,
+  deletePerformance
 };
+

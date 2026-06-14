@@ -5,7 +5,8 @@ const {
   getPerformances,
   getTrendingPerformances,
   getPerformanceById,
-  getUserPerformances
+  getUserPerformances,
+  deletePerformance
 } = require('../controllers/performanceController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -15,5 +16,6 @@ router.get('/', getPerformances);
 router.get('/trending', getTrendingPerformances);
 router.get('/:id', getPerformanceById);
 router.get('/user/:userId', getUserPerformances);
+router.delete('/:id', verifyToken, deletePerformance);
 
 module.exports = router;

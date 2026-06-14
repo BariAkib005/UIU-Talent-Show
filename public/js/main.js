@@ -179,12 +179,23 @@ function renderPerformanceCard(perf, hasVoted, viewType, index = 0) {
   const likeCount = perf.like_count || 0;
   const commentCount = perf.comment_count || 0;
 
+  let loggedInUser = null;
+  try {
+    loggedInUser = JSON.parse(localStorage.getItem('user'));
+  } catch (e) {}
+  const isOwner = loggedInUser && (Number(loggedInUser.id) === Number(perf.user_id));
+
   // Shared Action/Comment bar html template
   const actionSectionHTML = `
     <div style="display:flex; flex-direction:column; gap:8px; align-items:stretch; width:100%; margin-top: 12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         <span class="points-count-${perf.id}" style="font-size:0.85rem; color:var(--teal-800); font-weight:bold;">${pointsCount} pts</span>
         <div style="display:flex; gap:8px;">
+          ${isOwner ? `
+            <button class="delete-post-btn ghost" data-id="${perf.id}" style="padding: 6px 12px; font-size: 0.8rem; display:flex; align-items:center; gap:4px; border-radius:8px; color:#ff4a5a; border-color:rgba(255, 74, 90, 0.2);" title="Delete Post">
+              🗑️
+            </button>
+          ` : ''}
           <button class="vote-btn ${hasVoted ? 'primary' : 'ghost'}" data-id="${perf.id}" style="padding: 6px 12px; font-size: 0.8rem; display:flex; align-items:center; gap:4px; border-radius:8px;">
             👍 <span class="like-count-${perf.id}">${likeCount}</span>
           </button>
@@ -739,9 +750,13 @@ async function renderLeaderboard() {
         secondCard.className = 'podium';
         if (second) {
           const initials = second.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          const avatarStyle = second.profile_pic 
+            ? `background:url(${second.profile_pic}) center/cover no-repeat; color:transparent; border:none;`
+            : `background:var(--gradient); color:#fff;`;
+          const avatarContent = second.profile_pic ? '' : initials;
           secondCard.innerHTML = `
             <span class="rank">2</span>
-            <div class="avatar" style="background:var(--gradient); color:#fff;">${initials}</div>
+            <div class="avatar" style="${avatarStyle}">${avatarContent}</div>
             <h3>${escapeHtml(second.creator_name)}</h3>
             <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(second.department)}</p>
             <strong style="color:var(--teal-800); font-size:1.1rem; margin-top:4px;">${second.total_points} pts</strong>
@@ -762,9 +777,13 @@ async function renderLeaderboard() {
         firstCard.className = 'podium winner';
         if (first) {
           const initials = first.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          const avatarStyle = first.profile_pic 
+            ? `background:url(${first.profile_pic}) center/cover no-repeat; width:70px; height:70px; border:2px solid var(--border-color); box-shadow:0 0 10px rgba(15,138,126,0.2); color:transparent;`
+            : `background:var(--gradient); color:#fff; width:70px; height:70px; font-size:1.4rem; border:2px solid var(--border-color); box-shadow:0 0 10px rgba(15,138,126,0.2);`;
+          const avatarContent = first.profile_pic ? '' : initials;
           firstCard.innerHTML = `
             <span class="rank">1</span>
-            <div class="avatar" style="background:var(--gradient); color:#fff; width:70px; height:70px; font-size:1.4rem; border:2px solid var(--border-color); box-shadow:0 0 10px rgba(15,138,126,0.2);">${initials}</div>
+            <div class="avatar" style="${avatarStyle}">${avatarContent}</div>
             <h3 style="font-size:1.3rem;">${escapeHtml(first.creator_name)}</h3>
             <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(first.department)}</p>
             <strong style="color:var(--teal-800); font-size:1.25rem; margin-top:4px;">${first.total_points} pts</strong>
@@ -785,9 +804,13 @@ async function renderLeaderboard() {
         thirdCard.className = 'podium';
         if (third) {
           const initials = third.creator_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          const avatarStyle = third.profile_pic 
+            ? `background:url(${third.profile_pic}) center/cover no-repeat; color:transparent; border:none;`
+            : `background:var(--gradient); color:#fff;`;
+          const avatarContent = third.profile_pic ? '' : initials;
           thirdCard.innerHTML = `
             <span class="rank">3</span>
-            <div class="avatar" style="background:var(--gradient); color:#fff;">${initials}</div>
+            <div class="avatar" style="${avatarStyle}">${avatarContent}</div>
             <h3>${escapeHtml(third.creator_name)}</h3>
             <p style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${escapeHtml(third.department)}</p>
             <strong style="color:var(--teal-800); font-size:1.1rem; margin-top:4px;">${third.total_points} pts</strong>
@@ -1287,6 +1310,80 @@ async function loadCommentsForSubmission(submission_id) {
 }
 
 document.body.addEventListener('click', async (e) => {
+  // 0. Handle Delete Button Click actions
+  const deleteBtn = e.target.closest('.delete-post-btn');
+  if (deleteBtn) {
+    e.preventDefault();
+    if (deleteBtn.disabled) return;
+
+    if (!confirm('Are you sure you want to delete this performance post? This action is permanent and cannot be undone.')) {
+      return;
+    }
+
+    deleteBtn.disabled = true;
+    const submission_id = deleteBtn.dataset.id;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      showToast('You must be logged in to delete posts!', 'error');
+      deleteBtn.disabled = false;
+      return;
+    }
+
+    const cardEl = deleteBtn.closest('.post') || deleteBtn.closest('.card');
+    if (cardEl) {
+      cardEl.style.opacity = '0.5';
+      cardEl.style.pointerEvents = 'none';
+    }
+
+    try {
+      const response = await fetch(`/api/performances/${submission_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast(data.message, 'success');
+        
+        // If we are on the profile page, refresh profile stats and lists
+        if (window.location.pathname.includes('profile.html')) {
+          let loggedInUser = null;
+          try {
+            loggedInUser = JSON.parse(localStorage.getItem('user'));
+          } catch (err) {}
+          if (loggedInUser) {
+            await renderProfile(loggedInUser);
+          } else {
+            window.location.reload();
+          }
+        } else {
+          // Otherwise, remove the card from the DOM
+          if (cardEl) cardEl.remove();
+        }
+      } else {
+        showToast(data.message || 'Failed to delete post.', 'error');
+        if (cardEl) {
+          cardEl.style.opacity = '1';
+          cardEl.style.pointerEvents = 'auto';
+        }
+        deleteBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error('Delete post error:', err);
+      showToast('Failed to delete post. Server connection error.', 'error');
+      if (cardEl) {
+        cardEl.style.opacity = '1';
+        cardEl.style.pointerEvents = 'auto';
+      }
+      deleteBtn.disabled = false;
+    }
+    return;
+  }
+
   // 1. Handle Like Button Click actions
   const voteBtn = e.target.closest('.vote-btn');
   if (voteBtn) {
